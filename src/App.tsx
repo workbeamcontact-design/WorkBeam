@@ -49,8 +49,8 @@ function AuthRouter() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-start justify-center">
-      <div className="w-full max-w-[390px] min-h-screen bg-white shadow-xl">
+    <div className="min-h-screen bg-gray-100 flex items-start justify-center overflow-x-hidden">
+      <div className="w-full max-w-[390px] min-h-screen bg-white shadow-xl overflow-hidden">
         {renderAuthScreen()}
       </div>
     </div>
