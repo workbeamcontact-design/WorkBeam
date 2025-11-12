@@ -18,8 +18,7 @@ export function BottomNavigation({ activeTab, onTabChange, className }: BottomNa
   return (
     <div className={cn(
       "flex items-center justify-around px-2 py-2 bg-white border-t border-gray-200",
-      "fixed bottom-0 left-0 right-0 h-16 z-50",
-      "max-w-sm mx-auto md:max-w-[390px]", // Match mobile container width
+      "absolute bottom-0 left-0 right-0 h-16 z-50",
       "safe-area-inset-bottom", // Handle iPhone notches and safe areas
       className
     )}>

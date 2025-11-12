@@ -25,26 +25,36 @@ import { api } from './utils/api';
 function AuthRouter() {
   const [authScreen, setAuthScreen] = React.useState<'welcome' | 'login' | 'signup' | 'forgot-password'>('welcome');
 
-  switch (authScreen) {
-    case 'welcome':
-      return <Welcome onNavigate={setAuthScreen} />;
-    case 'login':
-      return (
-        <Login 
-          onBack={() => setAuthScreen('welcome')} 
-          onNavigate={setAuthScreen}
-        />
-      );
-    case 'signup':
-      return (
-        <Signup 
-          onBack={() => setAuthScreen('welcome')} 
-          onNavigate={() => setAuthScreen('login')}
-        />
-      );
-    case 'forgot-password':
-      return <ForgotPassword onBack={() => setAuthScreen('login')} />;
-  }
+  const renderAuthScreen = () => {
+    switch (authScreen) {
+      case 'welcome':
+        return <Welcome onNavigate={setAuthScreen} />;
+      case 'login':
+        return (
+          <Login 
+            onBack={() => setAuthScreen('welcome')} 
+            onNavigate={setAuthScreen}
+          />
+        );
+      case 'signup':
+        return (
+          <Signup 
+            onBack={() => setAuthScreen('welcome')} 
+            onNavigate={() => setAuthScreen('login')}
+          />
+        );
+      case 'forgot-password':
+        return <ForgotPassword onBack={() => setAuthScreen('login')} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-start justify-center">
+      <div className="w-full max-w-[390px] min-h-screen bg-white shadow-xl">
+        {renderAuthScreen()}
+      </div>
+    </div>
+  );
 }
 
 /**

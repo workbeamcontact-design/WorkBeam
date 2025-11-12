@@ -11,9 +11,9 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
     <button
       onClick={onClick}
       className={cn(
-        "fixed bottom-20 right-4 w-14 h-14 bg-blue-600 text-white rounded-full",
+        "absolute bottom-20 right-4 w-14 h-14 bg-blue-600 text-white rounded-full",
         "shadow-lg hover:bg-blue-700 transition-colors",
-        "flex items-center justify-center",
+        "flex items-center justify-center z-40",
         className
       )}
     >
