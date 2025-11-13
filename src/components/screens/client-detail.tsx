@@ -63,9 +63,24 @@ interface PaymentRecordingState {
 export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientDetailProps) {
   const { user } = useAuth();
   
-  // CRITICAL: Guard against null prop before any hooks or state
-  // This prevents crashes during Zustand hydration
-  const hasValidProp = clientProp && (typeof clientProp === 'string' || clientProp.id);
+  // DEBUG: Log every render
+  console.log('🔍 ClientDetail RENDER:', {
+    hasClientProp: !!clientProp,
+    clientPropType: typeof clientProp,
+    clientPropValue: clientProp,
+    isNull: clientProp === null,
+    isUndefined: clientProp === undefined
+  });
+  
+  // CRITICAL: Handle page refresh scenario
+  // When user refreshes on client-detail, Zustand persist sets data to null
+  // but keeps screen as 'client-detail'. We need to redirect immediately.
+  useEffect(() => {
+    if (!clientProp) {
+      console.error('❌ ClientDetail mounted with no client data (likely page refresh). Redirecting to clients list.');
+      onNavigate('clients');
+    }
+  }, [clientProp, onNavigate]);
   
   // Client data state - will be fetched if only ID is provided
   const [client, setClient] = useState<any>(null);
@@ -1149,32 +1164,14 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
     }
   };
 
-  // IMMEDIATE CHECK: Return early if no valid prop
-  if (!hasValidProp) {
+  // Guard: If no client prop, show loading while redirect happens
+  if (!clientProp) {
     return (
       <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="header bg-white p-4 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={20} className="text-gray-600" />
-            </button>
-            <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Client Not Found</h1>
-          </div>
-        </div>
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center">
-            <p className="trades-body text-gray-600 mb-4">
-              No client data provided. This may be due to a navigation error.
-            </p>
-            <button
-              onClick={() => onNavigate('clients')}
-              className="bg-primary text-primary-foreground px-6 py-3 rounded-xl trades-body hover:bg-primary/90 transition-colors"
-            >
-              Back to Clients
-            </button>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="trades-body text-gray-600">Redirecting...</p>
           </div>
         </div>
       </div>

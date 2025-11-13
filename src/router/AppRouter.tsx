@@ -113,6 +113,14 @@ const StubScreen: React.FC<{ screen: string; onBack: () => void }> = ({ screen, 
 export const AppRouter: React.FC = memo(() => {
   const { navigation, navigate, goBack, refreshCalendar, dashboardRefreshKey } = useAppStore();
   const { screen, data } = navigation;
+  
+  // DEBUG: Log navigation state on every render
+  console.log('🔍 AppRouter RENDER:', {
+    screen,
+    hasData: !!data,
+    dataType: typeof data,
+    dataValue: data
+  });
 
   // Track navigation performance safely
   useNavigationTracking(screen);
