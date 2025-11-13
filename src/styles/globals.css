@@ -974,6 +974,12 @@ html {
     margin: 0 auto;
     overflow: auto; /* Allow scrolling if content exceeds frame */
   }
+  
+  /* Convert fixed position elements to absolute inside the iPhone frame
+     This prevents FABs and fixed buttons from escaping the frame */
+  #root .fixed {
+    position: absolute !important;
+  }
 }
 
 /* On mobile devices, let the app use full width and height */
