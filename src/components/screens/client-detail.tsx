@@ -63,6 +63,10 @@ interface PaymentRecordingState {
 export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientDetailProps) {
   const { user } = useAuth();
   
+  // CRITICAL: Guard against null prop before any hooks or state
+  // This prevents crashes during Zustand hydration
+  const hasValidProp = clientProp && (typeof clientProp === 'string' || clientProp.id);
+  
   // Client data state - will be fetched if only ID is provided
   const [client, setClient] = useState<any>(null);
   const [clientLoading, setClientLoading] = useState(true);
@@ -1144,6 +1148,38 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
       setDeleting(false);
     }
   };
+
+  // IMMEDIATE CHECK: Return early if no valid prop
+  if (!hasValidProp) {
+    return (
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="header bg-white p-4 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onBack}
+              className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft size={20} className="text-gray-600" />
+            </button>
+            <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Client Not Found</h1>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center">
+            <p className="trades-body text-gray-600 mb-4">
+              No client data provided. This may be due to a navigation error.
+            </p>
+            <button
+              onClick={() => onNavigate('clients')}
+              className="bg-primary text-primary-foreground px-6 py-3 rounded-xl trades-body hover:bg-primary/90 transition-colors"
+            >
+              Back to Clients
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while fetching client data
   if (clientLoading) {
