@@ -1,5 +1,4 @@
 import React from 'react';
-import { MobileContainer } from '../ui/mobile-container';
 import { BottomNavigation } from '../trades-ui/bottom-navigation';
 import { Toaster } from '../ui/sonner';
 import { useAppStore } from '../../hooks/useAppStore';
@@ -10,6 +9,7 @@ interface AppLayoutProps {
 
 /**
  * Main app layout component - handles overall app structure
+ * Mobile frame is applied via CSS in globals.css - doesn't interfere with app layout
  */
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { navigation, getActiveTab } = useAppStore();
@@ -19,25 +19,23 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isPublicScreen = ['quote-approval', 'variation-approval'].includes(navigation.screen);
 
   return (
-    <MobileContainer>
-      <div className="relative h-full flex flex-col">
-        {/* Main content area */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          {children}
-        </div>
-        
-        {/* Bottom navigation - hide for public screens */}
-        {!isPublicScreen && (
-          <BottomNavigation 
-            activeTab={currentTab} 
-            onTabChange={(tab) => {
-              const { setTabScreen } = useAppStore.getState();
-              setTabScreen(tab);
-            }} 
-          />
-        )}
+    <div className="relative h-screen flex flex-col bg-white">
+      {/* Main content area */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {children}
       </div>
+      
+      {/* Bottom navigation - hide for public screens */}
+      {!isPublicScreen && (
+        <BottomNavigation 
+          activeTab={currentTab} 
+          onTabChange={(tab) => {
+            const { setTabScreen } = useAppStore.getState();
+            setTabScreen(tab);
+          }} 
+        />
+      )}
       <Toaster />
-    </MobileContainer>
+    </div>
   );
 };
