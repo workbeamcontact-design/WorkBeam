@@ -49,8 +49,8 @@ function AuthRouter() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-start justify-center overflow-x-hidden">
-      <div className="w-full max-w-[390px] min-h-screen bg-white shadow-xl overflow-hidden">
+    <div className="min-h-screen bg-gray-100 flex items-start justify-center">
+      <div className="w-full max-w-[390px] min-h-screen bg-white shadow-xl">
         {renderAuthScreen()}
       </div>
     </div>
@@ -156,15 +156,13 @@ function AuthenticatedApp() {
 export default function App() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="w-full max-w-[390px] h-screen bg-white shadow-xl flex items-center justify-center">
-          <div className="text-center">
-            <div className="mb-6 animate-pulse">
-              <WorkBeamLogo variant="light" width={200} />
-            </div>
-            <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
-            <p className="text-gray-600 trades-body">Loading WorkBeam...</p>
+      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-blue-50 to-white">
+        <div className="text-center">
+          <div className="mb-6 animate-pulse">
+            <WorkBeamLogo variant="light" width={200} />
           </div>
+          <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
+          <p className="text-gray-600 trades-body">Loading WorkBeam...</p>
         </div>
       </div>
     }>
@@ -186,15 +184,13 @@ function AppContent() {
   // Show loading state while checking auth
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="w-full max-w-[390px] h-screen bg-white shadow-xl flex items-center justify-center">
-          <div className="text-center">
-            <div className="mb-6 animate-pulse">
-              <WorkBeamLogo variant="light" width={200} />
-            </div>
-            <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
-            <p className="text-gray-600 trades-body">Signing you in...</p>
+      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-blue-50 to-white">
+        <div className="text-center">
+          <div className="mb-6 animate-pulse">
+            <WorkBeamLogo variant="light" width={200} />
           </div>
+          <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
+          <p className="text-gray-600 trades-body">Signing you in...</p>
         </div>
       </div>
     );
