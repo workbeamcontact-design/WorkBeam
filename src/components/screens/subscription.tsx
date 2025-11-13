@@ -91,7 +91,7 @@ export function Subscription({ onBack }: SubscriptionProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-surface">
+      <div className="flex items-center justify-center h-full bg-surface">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );

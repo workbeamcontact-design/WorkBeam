@@ -19,7 +19,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isPublicScreen = ['quote-approval', 'variation-approval'].includes(navigation.screen);
 
   return (
-    <div className="relative h-screen flex flex-col bg-white">
+    <div className="relative h-full flex flex-col bg-white">
       {/* Main content area */}
       <div className="flex-1 overflow-hidden flex flex-col">
         {children}

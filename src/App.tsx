@@ -151,7 +151,7 @@ function AuthenticatedApp() {
 export default function App() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center h-screen bg-white">
+      <div className="flex items-center justify-center h-full bg-white">
         <div className="text-center">
           <div className="mb-6 animate-pulse">
             <WorkBeamLogo variant="light" width={200} />
@@ -179,7 +179,7 @@ function AppContent() {
   // Show loading state while checking auth
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white">
+      <div className="flex items-center justify-center h-full bg-white">
         <div className="text-center">
           <div className="mb-6 animate-pulse">
             <WorkBeamLogo variant="light" width={200} />

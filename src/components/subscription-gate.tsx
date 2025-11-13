@@ -95,7 +95,7 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
   // Show loading spinner while checking subscription
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-surface">
+      <div className="flex items-center justify-center h-full bg-surface">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
           <p className="trades-body text-muted">Loading...</p>
@@ -129,8 +129,8 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
 
   // Show subscription required screen
   return (
-    <div className="h-screen bg-surface overflow-y-auto">
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="h-full bg-surface overflow-y-auto">
+      <div className="flex flex-col items-center justify-center p-4 min-h-full">
         <div className="w-full max-w-md">
           {/* Lock Icon */}
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
