@@ -195,9 +195,21 @@ export function Clients({ onNavigate }: ClientsProps) {
   // Handlers
   const handleClientSelect = useCallback((client: Client) => {
     if (client && client.id) {
+      console.log('📍 Navigating to client detail:', {
+        id: client.id,
+        name: client.name,
+        hasPhone: !!client.phone,
+        hasAddress: !!client.address,
+        allFields: Object.keys(client),
+        sample: client
+      });
       onNavigate('client-detail', client);
     } else {
-      console.warn('Cannot navigate to client detail: client data missing or invalid', client);
+      console.error('❌ Cannot navigate to client detail: client data missing or invalid', {
+        hasClient: !!client,
+        clientId: client?.id,
+        fullClient: client
+      });
       toast.error('Client data unavailable');
     }
   }, [onNavigate]);

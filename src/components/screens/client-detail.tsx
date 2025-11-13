@@ -87,9 +87,19 @@ export function ClientDetail({ client, onNavigate, onBack }: ClientDetailProps) 
 
   // Load client data when user logs in, client changes, or refresh is triggered
   useEffect(() => {
-    if (user && client?.id) {
-      console.log('👤 Client Detail: Loading data (user authenticated, client:', client.name, ')');
-      loadClientData();
+    if (user) {
+      if (client?.id) {
+        console.log('👤 Client Detail: Loading data (user authenticated, client:', client.name, ')');
+        loadClientData();
+      } else {
+        console.error('❌ Client Detail: No client data provided', {
+          hasClient: !!client,
+          clientId: client?.id,
+          user: user?.email
+        });
+        setError('Client data is missing. Please go back and select the client again.');
+        setLoading(false);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, client?.id, clientDetailRefreshKey, user]);
@@ -102,10 +112,24 @@ export function ClientDetail({ client, onNavigate, onBack }: ClientDetailProps) 
       // Skip re-fetching client - we already have the data
       // Just validate the client exists
       if (!client || !client.id) {
-        setError('Invalid client data.');
+        console.error('❌ Client Detail Error: Missing client data', { 
+          hasClient: !!client, 
+          clientId: client?.id,
+          clientName: client?.name,
+          fullClient: JSON.stringify(client, null, 2)
+        });
+        setError('Invalid client data. Please go back and try again.');
         setLoading(false);
         return;
       }
+      
+      console.log('✅ Client Detail: Loading data for client:', {
+        id: client.id,
+        name: client.name,
+        hasAddress: !!client.address,
+        hasPhone: !!client.phone,
+        allFields: Object.keys(client)
+      });
       
       const [clientJobs, clientQuotes, allInvoices, allPayments] = await Promise.all([
         api.getClientJobs(client.id),
@@ -113,6 +137,13 @@ export function ClientDetail({ client, onNavigate, onBack }: ClientDetailProps) 
         api.getInvoices(),
         api.getPayments()
       ]);
+      
+      console.log('✅ Client Detail: Fetched related data:', {
+        jobs: clientJobs?.length || 0,
+        quotes: clientQuotes?.length || 0,
+        invoices: allInvoices?.length || 0,
+        payments: allPayments?.length || 0
+      });
       
       const clientInvoices = allInvoices.filter((invoice: any) => invoice.clientId === client.id);
       const clientPayments = (allPayments || []).filter((payment: any) => payment.clientId === client.id);

@@ -73,18 +73,50 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
       // Create new client via API with validated data
       const newClient = await api.createClient(validation.data!);
 
-      if (newClient) {
+      if (newClient && newClient.id) {
+        console.log('✅ Client created successfully:', {
+          id: newClient.id,
+          name: newClient.name,
+          phone: newClient.phone,
+          address: newClient.address,
+          allFields: Object.keys(newClient),
+          fullData: JSON.stringify(newClient, null, 2)
+        });
+        
+        // Ensure client object has all required fields for client-detail
+        const clientForNavigation = {
+          id: newClient.id,
+          name: newClient.name,
+          phone: newClient.phone,
+          address: newClient.address,
+          email: newClient.email || '',
+          notes: newClient.notes || '',
+          createdAt: newClient.createdAt || newClient.created_at || new Date().toISOString(),
+          updatedAt: newClient.updatedAt || newClient.updated_at || new Date().toISOString(),
+          // Include any org-scoped fields if they exist
+          ...(newClient.organization_id && { organization_id: newClient.organization_id }),
+          ...(newClient.created_by_user_id && { created_by_user_id: newClient.created_by_user_id }),
+          ...(newClient.created_by_name && { created_by_name: newClient.created_by_name }),
+        };
+        
+        console.log('📍 Navigating with normalized client data:', clientForNavigation);
+        
         // Clear autosave draft on successful creation
         autosave.clearDraft();
         toast.success("Client saved successfully");
-        // Navigate to the new client's detail page
-        onNavigate("client-detail", newClient);
+        
+        // Small delay to ensure data is fully synced before navigation
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Navigate to the new client's detail page with full client data
+        onNavigate("client-detail", clientForNavigation);
       } else {
-        toast.error("Failed to save client");
+        console.error('❌ Client creation failed - no ID returned:', newClient);
+        toast.error("Failed to save client. Please try again.");
       }
     } catch (error) {
-      console.error('Error saving client:', error);
-      toast.error("Failed to save client");
+      console.error('❌ Error saving client:', error);
+      toast.error("Failed to save client. Please check your connection.");
     } finally {
       setSaving(false);
     }

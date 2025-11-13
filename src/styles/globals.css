@@ -980,6 +980,11 @@ html {
   #root .fixed {
     position: absolute !important;
   }
+  
+  /* Fix toast notifications (Sonner) to stay inside the iPhone frame */
+  #root [data-sonner-toaster] {
+    position: absolute !important;
+  }
 }
 
 /* On mobile devices, let the app use full width and height */
