@@ -10,6 +10,41 @@ interface ApiResponse<T> {
   error?: string;
 }
 
+/**
+ * Normalize data from org-scoped storage (snake_case) to frontend format (camelCase)
+ * This ensures compatibility between Vercel (org-scoped) and Figma Make (local storage)
+ */
+function normalizeClientData(data: any): any {
+  if (!data) return data;
+  
+  return {
+    ...data,
+    // Ensure camelCase versions exist
+    createdAt: data.createdAt || data.created_at,
+    updatedAt: data.updatedAt || data.updated_at,
+    // Remove snake_case versions to avoid confusion
+    created_at: undefined,
+    updated_at: undefined,
+  };
+}
+
+function normalizeJobData(data: any): any {
+  if (!data) return data;
+  
+  return {
+    ...data,
+    createdAt: data.createdAt || data.created_at,
+    updatedAt: data.updatedAt || data.updated_at,
+    created_at: undefined,
+    updated_at: undefined,
+  };
+}
+
+function normalizeArrayData(data: any[], normalizer: (item: any) => any): any[] {
+  if (!Array.isArray(data)) return data;
+  return data.map(normalizer);
+}
+
 class ApiClient {
   private useLocalFallback = false;
 
@@ -207,13 +242,15 @@ class ApiClient {
         
         if (orgResponse.success && orgResponse.data?.data) {
           console.log('✅ Using org-scoped clients:', orgResponse.data.data.length);
-          return orgResponse.data.data;
+          // Normalize data from org-scoped format
+          return normalizeArrayData(orgResponse.data.data, normalizeClientData);
         }
         
         // Fall back to user-scoped data (legacy)
         console.log('🔄 Falling back to user-scoped clients');
         const response = await this.request<{ clients: any[] }>('/clients');
-        return response.success ? response.data?.clients || [] : [];
+        const clients = response.success ? response.data?.clients || [] : [];
+        return normalizeArrayData(clients, normalizeClientData);
       },
       () => localApi.getClients()
     );
@@ -233,14 +270,14 @@ class ApiClient {
           const orgResponse = await this.requestOrgData<{ success: boolean; data: any }>('clients', id);
           if (orgResponse.success && orgResponse.data?.data) {
             console.log('✅ Using org-scoped client:', id);
-            return orgResponse.data.data;
+            return normalizeClientData(orgResponse.data.data);
           }
           
           // Fall back to user-scoped data (legacy)
           console.log('🔄 Falling back to user-scoped client:', id);
           const response = await this.request<{ client: any }>(`/clients/${id}`);
           if (response.success && response.data?.client) {
-            return response.data.client;
+            return normalizeClientData(response.data.client);
           } else if (response.error) {
             console.warn(`⚠️ Client fetch failed: ${response.error}`, { clientId: id });
             return null;
@@ -279,7 +316,7 @@ class ApiClient {
         
         if (orgResponse.success && orgResponse.data?.data) {
           console.log('✅ Created client in org-scoped storage:', orgResponse.data.data.id);
-          return orgResponse.data.data;
+          return normalizeClientData(orgResponse.data.data);
         }
         
         // Fall back to user-scoped data (legacy)
@@ -288,7 +325,7 @@ class ApiClient {
           method: 'POST',
           body: JSON.stringify(clientData),
         });
-        return response.success ? response.data?.client : null;
+        return response.success ? normalizeClientData(response.data?.client) : null;
       },
       () => localApi.createClient(clientData)
     );
@@ -312,7 +349,7 @@ class ApiClient {
         
         if (orgResponse.success && orgResponse.data?.data) {
           console.log('✅ Updated client in org-scoped storage:', id);
-          return orgResponse.data.data;
+          return normalizeClientData(orgResponse.data.data);
         }
         
         // Fall back to user-scoped data (legacy)
@@ -321,7 +358,7 @@ class ApiClient {
           method: 'PUT',
           body: JSON.stringify(clientData),
         });
-        return response.success ? response.data?.client : null;
+        return response.success ? normalizeClientData(response.data?.client) : null;
       },
       () => localApi.updateClient(id, clientData)
     );
@@ -375,13 +412,14 @@ class ApiClient {
         const orgResponse = await this.requestOrgData<{ success: boolean; data: any[] }>('jobs');
         if (orgResponse.success && orgResponse.data?.data) {
           console.log('✅ Using org-scoped jobs:', orgResponse.data.data.length);
-          return orgResponse.data.data;
+          return normalizeArrayData(orgResponse.data.data, normalizeJobData);
         }
         
         // Fall back to user-scoped data (legacy)
         console.log('🔄 Falling back to user-scoped jobs');
         const response = await this.request<{ jobs: any[] }>('/jobs');
-        return response.success ? response.data?.jobs || [] : [];
+        const jobs = response.success ? response.data?.jobs || [] : [];
+        return normalizeArrayData(jobs, normalizeJobData);
       },
       () => localApi.getJobs()
     );

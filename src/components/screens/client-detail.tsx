@@ -1,5 +1,5 @@
 import { Phone, Navigation, Plus, ArrowLeft, Quote, Edit, Trash2, MapPin, CreditCard, CheckCircle, Clock, AlertTriangle, TrendingUp, Calendar, Receipt, Eye, User, Settings as SettingsIcon, Mail, ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { StatusBadge } from "../trades-ui/status-badge";
 import { QuoteStatusBadge } from "../trades-ui/quote-status-badge";
 import { FloatingActionButton } from "../trades-ui/floating-action-button";
@@ -60,8 +60,27 @@ interface PaymentRecordingState {
   reference: string;
 }
 
-export function ClientDetail({ client, onNavigate, onBack }: ClientDetailProps) {
+export function ClientDetail({ client: rawClient, onNavigate, onBack }: ClientDetailProps) {
   const { user } = useAuth();
+  
+  // Normalize client data to handle any inconsistencies (memoized to prevent infinite loops)
+  const client = useMemo(() => {
+    if (!rawClient) return null;
+    
+    return {
+      ...rawClient,
+      // Ensure required fields exist with fallbacks
+      id: rawClient.id,
+      name: rawClient.name || 'Unknown Client',
+      phone: rawClient.phone || '',
+      address: rawClient.address || '',
+      email: rawClient.email || '',
+      notes: rawClient.notes || '',
+      createdAt: rawClient.createdAt || rawClient.created_at || new Date().toISOString(),
+      updatedAt: rawClient.updatedAt || rawClient.updated_at || new Date().toISOString(),
+    };
+  }, [rawClient]);
+  
   const [jobs, setJobs] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
