@@ -93,6 +93,13 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
   // STEP 1: Fetch full client data if only ID was provided
   // This handles the case where Zustand's persist middleware wipes the navigation data
   useEffect(() => {
+    console.log('🔍 ClientDetail useEffect triggered:', {
+      hasClientProp: !!clientProp,
+      clientPropType: typeof clientProp,
+      clientPropKeys: clientProp ? Object.keys(clientProp) : [],
+      clientPropSample: clientProp
+    });
+
     const fetchClientData = async () => {
       if (!clientProp) {
         console.error('❌ ClientDetail: No client prop provided');
@@ -104,6 +111,12 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
       // Extract client ID (could be string or object with id)
       const clientId = typeof clientProp === 'string' ? clientProp : clientProp.id;
       
+      console.log('🔑 ClientDetail: Extracted client ID:', { 
+        clientId, 
+        propType: typeof clientProp,
+        hasName: !!(clientProp as any).name 
+      });
+      
       if (!clientId) {
         console.error('❌ ClientDetail: No client ID found', { clientProp });
         setError('Invalid client reference. Please go back and try again.');
@@ -112,8 +125,8 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
       }
 
       // If we have full client data with name, use it directly
-      if (clientProp.name) {
-        console.log('✅ ClientDetail: Using provided client data', { id: clientId, name: clientProp.name });
+      if ((clientProp as any).name) {
+        console.log('✅ ClientDetail: Using provided client data', { id: clientId, name: (clientProp as any).name });
         setClient(clientProp);
         setClientLoading(false);
         return;
@@ -123,6 +136,13 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
       console.log('🔄 ClientDetail: Fetching client data by ID', { clientId });
       try {
         const fetchedClient = await api.getClient(clientId);
+        console.log('📦 ClientDetail: API response:', { 
+          success: !!fetchedClient, 
+          hasId: fetchedClient?.id,
+          hasName: fetchedClient?.name,
+          client: fetchedClient 
+        });
+        
         if (fetchedClient) {
           console.log('✅ ClientDetail: Fetched client data', { id: fetchedClient.id, name: fetchedClient.name });
           setClient(fetchedClient);
@@ -1151,7 +1171,7 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
   }
 
   // Show error if client couldn't be loaded
-  if (!client) {
+  if (!client || !client.id || !client.name) {
     return (
       <div className="flex-1 overflow-hidden flex flex-col">
         <div className="header bg-white p-4 border-b border-gray-200">
@@ -1180,6 +1200,7 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
     );
   }
 
+  // At this point, client is guaranteed to have id and name
   return (
     <div className="flex-1 overflow-hidden flex flex-col relative">
       <div className="header bg-white p-4 border-b border-gray-200">
