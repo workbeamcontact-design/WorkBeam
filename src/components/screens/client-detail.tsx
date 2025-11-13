@@ -17,7 +17,7 @@ import { useAuth } from "../../utils/auth-context";
 import { AttributionDisplay } from "../ui/attribution-display";
 
 interface ClientDetailProps {
-  client: any;
+  client: any; // Can be full client object OR just { id: string }
   onNavigate: (screen: string, data?: any) => void;
   onBack: () => void;
 }
@@ -60,26 +60,12 @@ interface PaymentRecordingState {
   reference: string;
 }
 
-export function ClientDetail({ client: rawClient, onNavigate, onBack }: ClientDetailProps) {
+export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientDetailProps) {
   const { user } = useAuth();
   
-  // Normalize client data to handle any inconsistencies (memoized to prevent infinite loops)
-  const client = useMemo(() => {
-    if (!rawClient) return null;
-    
-    return {
-      ...rawClient,
-      // Ensure required fields exist with fallbacks
-      id: rawClient.id,
-      name: rawClient.name || 'Unknown Client',
-      phone: rawClient.phone || '',
-      address: rawClient.address || '',
-      email: rawClient.email || '',
-      notes: rawClient.notes || '',
-      createdAt: rawClient.createdAt || rawClient.created_at || new Date().toISOString(),
-      updatedAt: rawClient.updatedAt || rawClient.updated_at || new Date().toISOString(),
-    };
-  }, [rawClient]);
+  // Client data state - will be fetched if only ID is provided
+  const [client, setClient] = useState<any>(null);
+  const [clientLoading, setClientLoading] = useState(true);
   
   const [jobs, setJobs] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -104,24 +90,65 @@ export function ClientDetail({ client: rawClient, onNavigate, onBack }: ClientDe
   // Watch for refresh trigger from app store
   const { clientDetailRefreshKey } = require('../../hooks/useAppStore').useAppStore();
 
-  // Load client data when user logs in, client changes, or refresh is triggered
+  // STEP 1: Fetch full client data if only ID was provided
+  // This handles the case where Zustand's persist middleware wipes the navigation data
   useEffect(() => {
-    if (user) {
-      if (client?.id) {
-        console.log('👤 Client Detail: Loading data (user authenticated, client:', client.name, ')');
-        loadClientData();
-      } else {
-        console.error('❌ Client Detail: No client data provided', {
-          hasClient: !!client,
-          clientId: client?.id,
-          user: user?.email
-        });
-        setError('Client data is missing. Please go back and select the client again.');
-        setLoading(false);
+    const fetchClientData = async () => {
+      if (!clientProp) {
+        console.error('❌ ClientDetail: No client prop provided');
+        setError('Client not found. Please go back and try again.');
+        setClientLoading(false);
+        return;
       }
+
+      // Extract client ID (could be string or object with id)
+      const clientId = typeof clientProp === 'string' ? clientProp : clientProp.id;
+      
+      if (!clientId) {
+        console.error('❌ ClientDetail: No client ID found', { clientProp });
+        setError('Invalid client reference. Please go back and try again.');
+        setClientLoading(false);
+        return;
+      }
+
+      // If we have full client data with name, use it directly
+      if (clientProp.name) {
+        console.log('✅ ClientDetail: Using provided client data', { id: clientId, name: clientProp.name });
+        setClient(clientProp);
+        setClientLoading(false);
+        return;
+      }
+
+      // Otherwise, fetch the full client data by ID
+      console.log('🔄 ClientDetail: Fetching client data by ID', { clientId });
+      try {
+        const fetchedClient = await api.getClient(clientId);
+        if (fetchedClient) {
+          console.log('✅ ClientDetail: Fetched client data', { id: fetchedClient.id, name: fetchedClient.name });
+          setClient(fetchedClient);
+        } else {
+          console.error('❌ ClientDetail: Client not found', { clientId });
+          setError('Client not found. It may have been deleted.');
+        }
+      } catch (err) {
+        console.error('❌ ClientDetail: Error fetching client', err);
+        setError('Failed to load client data. Please try again.');
+      } finally {
+        setClientLoading(false);
+      }
+    };
+
+    fetchClientData();
+  }, [clientProp]);
+
+  // STEP 2: Load client data when user logs in, client changes, or refresh is triggered
+  useEffect(() => {
+    if (user && client?.id && !clientLoading) {
+      console.log('👤 Client Detail: Loading related data for client:', client.name);
+      loadClientData();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, client?.id, clientDetailRefreshKey, user]);
+  }, [client, client?.id, clientDetailRefreshKey, user, clientLoading]);
 
   const loadClientData = async () => {
     try {
@@ -1098,6 +1125,32 @@ export function ClientDetail({ client: rawClient, onNavigate, onBack }: ClientDe
     }
   };
 
+  // Show loading state while fetching client data
+  if (clientLoading) {
+    return (
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="header bg-white p-4 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onBack}
+              className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft size={20} className="text-gray-600" />
+            </button>
+            <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Loading Client...</h1>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="trades-body text-gray-600">Loading client data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if client couldn't be loaded
   if (!client) {
     return (
       <div className="flex-1 overflow-hidden flex flex-col">
@@ -1112,8 +1165,16 @@ export function ClientDetail({ client: rawClient, onNavigate, onBack }: ClientDe
             <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Client Not Found</h1>
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center">
-          <p className="trades-body text-gray-600">Client data not available.</p>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center">
+            <p className="trades-body text-gray-600 mb-4">{error || 'Client data not available.'}</p>
+            <button
+              onClick={() => onNavigate('clients')}
+              className="bg-primary text-primary-foreground px-6 py-3 rounded-xl trades-body hover:bg-primary/90 transition-colors"
+            >
+              Back to Clients
+            </button>
+          </div>
         </div>
       </div>
     );
