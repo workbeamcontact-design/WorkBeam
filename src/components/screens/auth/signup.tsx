@@ -101,7 +101,7 @@ export function Signup({ onBack, onNavigate }: SignupProps) {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white overflow-hidden">
+    <div className="flex flex-col h-full min-h-screen bg-white overflow-y-auto overflow-x-hidden">
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-gray-200">
         <div className="flex items-center gap-3">

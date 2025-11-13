@@ -8,11 +8,11 @@ interface WelcomeProps {
 
 export function Welcome({ onNavigate }: WelcomeProps) {
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ 
+    <div className="flex flex-col h-full min-h-screen overflow-y-auto overflow-x-hidden" style={{ 
       background: 'linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 100%)'
     }}>
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 min-h-0">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 min-h-0">
         {/* Logo Container with subtle animation */}
         <div className="mb-8 animate-in fade-in duration-500">
           <WorkBeamLogo variant="light" width={180} />

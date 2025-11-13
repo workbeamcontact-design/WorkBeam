@@ -974,6 +974,13 @@ html {
     margin: 0 auto;
     overflow: hidden; /* Clip content to rounded corners */
   }
+  
+  /* Make content inside scrollable while maintaining frame */
+  #root > * {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
 
 /* On mobile devices, let the app use full width and height */
