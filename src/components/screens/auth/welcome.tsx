@@ -8,7 +8,7 @@ interface WelcomeProps {
 
 export function Welcome({ onNavigate }: WelcomeProps) {
   return (
-    <div className="flex flex-col h-full overflow-hidden" style={{ 
+    <div className="flex flex-col h-screen overflow-hidden" style={{ 
       background: 'linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 100%)'
     }}>
       {/* Main Content Area */}

@@ -7,13 +7,11 @@ interface MobileContainerProps {
 
 export function MobileContainer({ children, className }: MobileContainerProps) {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-start justify-center overflow-x-hidden">
-      <div className={cn(
-        "w-full max-w-[390px] min-h-screen bg-white relative shadow-xl overflow-hidden",
-        className
-      )}>
-        {children}
-      </div>
+    <div className={cn(
+      "w-full h-screen bg-white relative mx-auto",
+      className
+    )}>
+      {children}
     </div>
   );
 }
