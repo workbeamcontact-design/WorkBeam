@@ -599,30 +599,6 @@
     }
   }
 
-  .btn-responsive-sm {
-    height: var(--btn-height-sm);
-  }
-
-  .btn-responsive {
-    height: var(--btn-height-default);
-    padding-left: var(--btn-padding-x);
-    padding-right: var(--btn-padding-x);
-  }
-
-  .btn-responsive-lg {
-    height: var(--btn-height-lg);
-  }
-
-  .btn-icon-responsive {
-    width: var(--btn-height-default);
-    height: var(--btn-height-default);
-  }
-
-  .fab-responsive {
-    width: var(--fab-size);
-    height: var(--fab-size);
-  }
-
   .safe-area-inset-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -4468,16 +4444,6 @@
   --mobile-width: 430px;
   --mobile-height: 932px;
   --mobile-frame-enabled: 1;
-  --btn-height-sm: clamp(38px, 9vw, 42px);
-  --btn-height-default: clamp(44px, 10.5vw, 48px);
-  --btn-height-lg: clamp(50px, 12vw, 56px);
-  --btn-padding-x: clamp(16px, 3.5vw, 18px);
-  --btn-padding-y: clamp(8px, 2vw, 10px);
-  --icon-size-sm: clamp(16px, 4vw, 18px);
-  --icon-size-default: clamp(20px, 5vw, 24px);
-  --icon-size-lg: clamp(24px, 5.5vw, 28px);
-  --fab-size: clamp(56px, 13vw, 64px);
-  --fab-icon-size: clamp(24px, 5.5vw, 28px);
   --h1-size: 22px;
   --h1-line: 28px;
   --h2-size: 18px;

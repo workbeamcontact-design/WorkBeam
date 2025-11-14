@@ -273,11 +273,10 @@ export function Clients({ onNavigate }: ClientsProps) {
             <p className="trades-body text-red-600 mb-4">{error}</p>
             <button
               onClick={loadClients}
-              className="bg-blue-600 text-white rounded-xl trades-body hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white rounded-xl trades-body hover:bg-blue-700 transition-colors px-6"
               style={{
-                height: 'clamp(44px, 12vw, 58px)',
-                paddingLeft: 'clamp(18px, 5.6vw, 28px)',
-                paddingRight: 'clamp(18px, 5.6vw, 28px)'
+                height: '56px',
+                minHeight: '44px'
               }}
             >
               Try Again
@@ -299,12 +298,14 @@ export function Clients({ onNavigate }: ClientsProps) {
               onClick={handleAddClient}
               className="bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors"
               style={{
-                width: 'clamp(40px, 11.2vw, 52px)',
-                height: 'clamp(40px, 11.2vw, 52px)'
+                width: '48px',
+                height: '48px',
+                minWidth: '44px',
+                minHeight: '44px'
               }}
               aria-label="Add client"
             >
-              <Plus style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} />
+              <Plus size={20} />
             </button>
           </div>
         </div>
@@ -319,11 +320,10 @@ export function Clients({ onNavigate }: ClientsProps) {
             </p>
             <button
               onClick={handleAddClient}
-              className="bg-blue-600 text-white rounded-xl trades-body hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white rounded-xl trades-body hover:bg-blue-700 transition-colors px-6"
               style={{
-                height: 'clamp(44px, 12vw, 58px)',
-                paddingLeft: 'clamp(18px, 5.6vw, 28px)',
-                paddingRight: 'clamp(18px, 5.6vw, 28px)'
+                height: '56px',
+                minHeight: '44px'
               }}
             >
               Add First Client
@@ -344,12 +344,14 @@ export function Clients({ onNavigate }: ClientsProps) {
             onClick={handleAddClient}
             className="bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors"
             style={{
-              width: 'clamp(40px, 11.2vw, 52px)',
-              height: 'clamp(40px, 11.2vw, 52px)'
+              width: '48px',
+              height: '48px',
+              minWidth: '44px',
+              minHeight: '44px'
             }}
             aria-label="Add client"
           >
-            <Plus style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} />
+            <Plus size={20} />
           </button>
         </div>
 

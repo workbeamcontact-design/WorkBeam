@@ -17,12 +17,13 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
         className
       )}
       style={{
-        // Responsive sizing: 56px at 390px (iPhone 16) → 62px at 430px (Pro Max)
-        width: 'clamp(45px, 14.4vw, 70px)',
-        height: 'clamp(45px, 14.4vw, 70px)'
+        width: '56px',
+        height: '56px',
+        minWidth: '44px',
+        minHeight: '44px'
       }}
     >
-      <Plus style={{ width: 'clamp(20px, 5.6vw, 28px)', height: 'clamp(20px, 5.6vw, 28px)' }} />
+      <Plus size={24} />
     </button>
   );
 }

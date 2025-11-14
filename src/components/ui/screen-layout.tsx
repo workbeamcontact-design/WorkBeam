@@ -102,19 +102,18 @@ export function SaveFooter({
         disabled={saving}
         className="w-full bg-blue-600 text-white rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         style={{
-          height: 'clamp(48px, 13vw, 62px)',
-          paddingTop: 'clamp(10px, 3.2vw, 16px)',
-          paddingBottom: 'clamp(10px, 3.2vw, 16px)'
+          height: '56px',
+          minHeight: '44px'
         }}
       >
         {saving ? (
           <>
-            <div className="animate-spin border-2 border-white border-t-transparent rounded-full" style={{ width: 'clamp(14px, 4.6vw, 20px)', height: 'clamp(14px, 4.6vw, 20px)' }}></div>
+            <div className="w-5 h-5 animate-spin border-2 border-white border-t-transparent rounded-full"></div>
             Saving...
           </>
         ) : (
           <>
-            <Check style={{ width: 'clamp(14px, 4.6vw, 20px)', height: 'clamp(14px, 4.6vw, 20px)' }} />
+            <Check size={18} />
             {saveText}
           </>
         )}
