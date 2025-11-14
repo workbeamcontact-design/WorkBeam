@@ -952,27 +952,51 @@ html {
  */
 @media (min-width: 768px) {
   body {
-    background: #f3f4f6 !important; /* Gray background like Figma Make */
+    background: #1f2937 !important; /* Dark grey background for desktop */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px 0;
+    padding: 0;
     margin: 0;
     min-height: 100vh;
-    overflow: auto;
+    overflow: hidden; /* Prevent page scrollbars */
   }
   
   #root {
     width: var(--mobile-width);
     height: var(--mobile-height);
-    max-width: var(--mobile-width);
-    max-height: var(--mobile-height);
+    max-width: 90vw; /* Ensure frame fits on narrow screens */
+    max-height: calc(100vh - 40px); /* Leave 20px margin top/bottom */
     background: white;
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     border-radius: 48px; /* iPhone-style rounded corners */
     position: relative;
-    margin: 0 auto;
+    margin: 20px auto;
     overflow: auto; /* Allow scrolling if content exceeds frame */
+    transform-origin: center center;
+  }
+  
+  /* Proportionally scale the frame when viewport is too small to fit 430×932px */
+  @media (max-height: 972px) {
+    /* If viewport height - 40px margin is less than 932px, scale down */
+    #root {
+      transform: scale(calc((100vh - 40px) / 932));
+    }
+  }
+  
+  /* Also handle narrow viewports (less common but possible) */
+  @media (max-width: 478px) {
+    /* If viewport width - 48px margin is less than 430px, scale down */
+    #root {
+      transform: scale(calc((100vw - 48px) / 430));
+    }
+  }
+  
+  /* Handle both constraints simultaneously */
+  @media (max-height: 972px) and (max-width: 478px) {
+    #root {
+      transform: scale(min(calc((100vh - 40px) / 932), calc((100vw - 48px) / 430)));
+    }
   }
   
   /* Convert fixed position elements to absolute inside the iPhone frame

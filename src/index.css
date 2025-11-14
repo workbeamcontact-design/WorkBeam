@@ -4787,23 +4787,42 @@ html {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 24px 0;
+    padding: 0;
     display: flex;
-    overflow: auto;
-    background: #f3f4f6 !important;
+    overflow: hidden;
+    background: #1f2937 !important;
   }
 
   #root {
     width: var(--mobile-width);
     height: var(--mobile-height);
-    max-width: var(--mobile-width);
-    max-height: var(--mobile-height);
+    transform-origin: center;
     background: #fff;
     border-radius: 48px;
-    margin: 0 auto;
+    max-width: 90vw;
+    max-height: calc(100vh - 40px);
+    margin: 20px auto;
     position: relative;
     overflow: auto;
     box-shadow: 0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a;
+  }
+
+  @media (height <= 972px) {
+    #root {
+      transform: scale(calc((100vh - 40px) / 932));
+    }
+  }
+
+  @media (width <= 478px) {
+    #root {
+      transform: scale(calc((100vw - 48px) / 430));
+    }
+  }
+
+  @media (height <= 972px) and (width <= 478px) {
+    #root {
+      transform: scale(min(calc((100vh - 40px) / 932), calc((100vw - 48px) / 430)));
+    }
   }
 
   #root .fixed, #root [data-sonner-toaster] {
