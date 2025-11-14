@@ -52,7 +52,7 @@ function DialogContent({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal data-slot="dialog-portal" container={typeof document !== 'undefined' ? document.getElementById('root') : undefined}>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"

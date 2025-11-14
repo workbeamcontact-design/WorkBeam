@@ -22,9 +22,10 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
   // Add your company email(s) here to bypass subscription requirements
   const WHITELISTED_EMAILS = [
     'workbeamcontact@gmail.com',  // Company account
-    // Add more emails as needed:
-    // 'admin@yourcompany.com',
-    // 'demo@yourcompany.com',
+    // Add tester emails below (one per line):
+    // 'tester1@gmail.com',
+    // 'tester2@gmail.com',
+    // 'tester3@gmail.com',
   ];
 
   // Check if current user is whitelisted

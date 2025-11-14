@@ -32,7 +32,7 @@ const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPortal>
+  <AlertDialogPortal container={typeof document !== 'undefined' ? document.getElementById('root') : undefined}>
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       data-slot="alert-dialog-content"

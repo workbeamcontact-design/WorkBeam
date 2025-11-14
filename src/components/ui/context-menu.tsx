@@ -98,7 +98,7 @@ function ContextMenuContent({
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.Content>) {
   return (
-    <ContextMenuPrimitive.Portal>
+    <ContextMenuPrimitive.Portal container={typeof document !== 'undefined' ? document.getElementById('root') : undefined}>
       <ContextMenuPrimitive.Content
         data-slot="context-menu-content"
         className={cn(

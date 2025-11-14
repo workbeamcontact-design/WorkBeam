@@ -53,7 +53,7 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left";
 }) {
   return (
-    <SheetPortal>
+    <SheetPortal container={typeof document !== 'undefined' ? document.getElementById('root') : undefined}>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
