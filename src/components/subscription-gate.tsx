@@ -58,11 +58,47 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
     const subscriptionParam = params.get('subscription');
     
     if (subscriptionParam === 'success') {
-      // Remove the parameter and reload subscription
+      // Remove the parameter and poll for subscription activation
       window.history.replaceState({}, '', window.location.pathname);
-      setTimeout(() => loadSubscription(), 2000); // Give webhook time to process
+      console.log('🎉 Returned from Stripe checkout - waiting for subscription activation...');
+      
+      // Poll for subscription status every 2 seconds for up to 30 seconds
+      let pollAttempts = 0;
+      const maxAttempts = 15;
+      
+      const pollInterval = setInterval(async () => {
+        pollAttempts++;
+        console.log(`Polling for subscription... (attempt ${pollAttempts}/${maxAttempts})`);
+        
+        try {
+          const status = await SubscriptionAPI.getStatus();
+          
+          if (status.active) {
+            console.log('✅ Subscription activated!');
+            clearInterval(pollInterval);
+            setSubscription(status);
+            setLoading(false);
+          } else if (pollAttempts >= maxAttempts) {
+            console.warn('⚠️ Subscription not activated after polling - webhook may be delayed');
+            clearInterval(pollInterval);
+            // Show the status anyway and let user proceed
+            setSubscription(status);
+            setLoading(false);
+          }
+        } catch (err) {
+          console.error('Error polling subscription:', err);
+          if (pollAttempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            setLoading(false);
+          }
+        }
+      }, 2000);
+      
+      // Clean up interval on unmount
+      return () => clearInterval(pollInterval);
     } else if (subscriptionParam === 'canceled') {
       window.history.replaceState({}, '', window.location.pathname);
+      console.log('❌ Checkout canceled by user');
     }
   }, []);
 
