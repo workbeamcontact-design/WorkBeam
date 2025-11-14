@@ -1079,38 +1079,48 @@ export function JobDetail({ job, onNavigate, onBack }: JobDetailProps) {
       </div>
 
       {/* Floating Action Buttons */}
-      <div className="absolute bottom-4 left-4 right-4 flex gap-3">
-        <button
-          onClick={() => {
-            // Use currentJob if available (freshly loaded data with VAT fields), otherwise fallback to job prop
-            const jobToPass = currentJob || job;
-            onNavigate('generate-invoice', { 
-              ...jobToPass, 
-              clientId: jobToPass?.clientId || clientData?.id,
+      <div className="absolute bottom-20 left-0 right-0 px-4">
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              // Use currentJob if available (freshly loaded data with VAT fields), otherwise fallback to job prop
+              const jobToPass = currentJob || job;
+              onNavigate('generate-invoice', { 
+                ...jobToPass, 
+                clientId: jobToPass?.clientId || clientData?.id,
+                client: clientData 
+              });
+            }}
+            className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+            style={{
+              backgroundColor: '#0A84FF',
+              color: 'white',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
+          >
+            <Plus size={20} />
+            <span className="trades-body">Invoice</span>
+          </button>
+          <button
+            onClick={() => onNavigate('add-booking', { 
+              job: job,
               client: clientData 
-            });
-          }}
-          className="flex-1 h-14 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
-          style={{
-            minWidth: '140px'
-          }}
-        >
-          <Plus size={22} />
-          <span className="trades-body font-medium text-[16px]">Invoice</span>
-        </button>
-        <button
-          onClick={() => onNavigate('add-booking', { 
-            job: job,
-            client: clientData 
-          })}
-          className="flex-1 h-14 bg-green-600 text-white rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-green-700 transition-colors"
-          style={{
-            minWidth: '140px'
-          }}
-        >
-          <Calendar size={22} />
-          <span className="trades-body font-medium text-[16px]">Booking</span>
-        </button>
+            })}
+            className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+            style={{
+              backgroundColor: '#16A34A',
+              color: 'white',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
+          >
+            <Calendar size={20} />
+            <span className="trades-body">Booking</span>
+          </button>
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}

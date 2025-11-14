@@ -522,33 +522,39 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
       </div>
 
       {/* Floating Action Buttons - Fixed at bottom, floating over content */}
-      <div className="fixed bottom-20 left-4 right-4 flex gap-3 z-10">
-        {/* Cancel FAB - Red */}
-        <button
-          onClick={onBack}
-          className="flex-1 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-95"
-          style={{ 
-            backgroundColor: '#DC2626', 
-            color: '#ffffff',
-            boxShadow: '0 8px 16px rgba(220, 38, 38, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)'
-          }}
-        >
-          <span className="trades-body">Cancel</span>
-        </button>
-        
-        {/* Record Payment FAB - Green */}
-        <button
-          onClick={handleSave}
-          disabled={!isValidAmount}
-          className="flex-1 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ 
-            backgroundColor: '#16A34A', 
-            color: '#ffffff',
-            boxShadow: !isValidAmount ? 'none' : '0 8px 16px rgba(22, 163, 74, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)'
-          }}
-        >
-          <span className="trades-body">Record Payment</span>
-        </button>
+      <div className="absolute bottom-20 left-0 right-0 px-4">
+        <div className="flex gap-3">
+          {/* Cancel FAB - Red */}
+          <button
+            onClick={onBack}
+            className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+            style={{ 
+              backgroundColor: '#DC2626', 
+              color: '#ffffff',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
+          >
+            <span className="trades-body">Cancel</span>
+          </button>
+          
+          {/* Record Payment FAB - Green */}
+          <button
+            onClick={handleSave}
+            disabled={!isValidAmount}
+            className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
+            style={{ 
+              backgroundColor: '#16A34A', 
+              color: '#ffffff',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
+          >
+            <span className="trades-body">Record Payment</span>
+          </button>
+        </div>
       </div>
     </div>
   );

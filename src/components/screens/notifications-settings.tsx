@@ -437,8 +437,8 @@ export function NotificationsSettings({ onNavigate, onBack }: NotificationsSetti
 
       {/* Save Button - Floating Action Button */}
       {hasChanges && (
-        <div className="fixed bottom-16 left-0 right-0 px-4 py-4 bg-surface-alt z-10 pointer-events-none max-w-sm mx-auto md:max-w-[390px]">
-          <div className="pointer-events-auto space-y-3">
+        <div className="absolute bottom-20 left-0 right-0 px-4 bg-surface-alt z-10">
+          <div className="space-y-3">
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-warning/10 text-warning rounded-full">
                 <div className="w-2 h-2 bg-warning rounded-full" />
@@ -449,17 +449,24 @@ export function NotificationsSettings({ onNavigate, onBack }: NotificationsSetti
             <button
               onClick={handleSavePreferences}
               disabled={saving}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+              style={{
+                backgroundColor: '#0A84FF',
+                color: 'white',
+                height: '56px',
+                borderRadius: '12px',
+                minHeight: '44px'
+              }}
             >
               {saving ? (
                 <>
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  Saving...
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span className="trades-body">Saving...</span>
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
-                  Save Changes
+                  <Check size={20} />
+                  <span className="trades-body">Save Changes</span>
                 </>
               )}
             </button>

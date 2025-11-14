@@ -773,10 +773,6 @@
     container: card-header / inline-size;
   }
 
-  .pointer-events-auto {
-    pointer-events: auto;
-  }
-
   .pointer-events-none {
     pointer-events: none;
   }
@@ -825,10 +821,6 @@
     inset: calc(var(--spacing) * 0);
   }
 
-  .inset-x-0 {
-    inset-inline: calc(var(--spacing) * 0);
-  }
-
   .-top-3 {
     top: calc(var(--spacing) * -3);
   }
@@ -875,14 +867,6 @@
 
   .bottom-0 {
     bottom: calc(var(--spacing) * 0);
-  }
-
-  .bottom-4 {
-    bottom: calc(var(--spacing) * 4);
-  }
-
-  .bottom-16 {
-    bottom: calc(var(--spacing) * 16);
   }
 
   .bottom-20 {
@@ -1513,10 +1497,6 @@
 
   .max-w-\[120px\] {
     max-width: 120px;
-  }
-
-  .max-w-\[390px\] {
-    max-width: 390px;
   }
 
   .max-w-\[calc\(100\%-2rem\)\] {
@@ -2645,10 +2625,6 @@
 
   .text-\[11px\] {
     font-size: 11px;
-  }
-
-  .text-\[16px\] {
-    font-size: 16px;
   }
 
   .leading-none {
@@ -4127,12 +4103,6 @@
   @media (width >= 40rem) {
     .sm\:text-left {
       text-align: left;
-    }
-  }
-
-  @media (width >= 48rem) {
-    .md\:max-w-\[390px\] {
-      max-width: 390px;
     }
   }
 

@@ -63,10 +63,8 @@ export function ScreenLayout({
 
       {/* Footer */}
       {footer && (
-        <div className="fixed bottom-16 left-0 right-0 px-4 py-4 bg-surface-alt z-10 pointer-events-none max-w-sm mx-auto md:max-w-[390px]">
-          <div className="pointer-events-auto">
-            {footer}
-          </div>
+        <div className="absolute bottom-20 left-0 right-0 px-4 bg-surface-alt z-10">
+          {footer}
         </div>
       )}
     </div>
@@ -100,21 +98,24 @@ export function SaveFooter({
       <button
         onClick={onSave}
         disabled={saving}
-        className="w-full bg-blue-600 text-white rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
         style={{
+          backgroundColor: '#0A84FF',
+          color: 'white',
           height: '56px',
+          borderRadius: '12px',
           minHeight: '44px'
         }}
       >
         {saving ? (
           <>
-            <div className="w-5 h-5 animate-spin border-2 border-white border-t-transparent rounded-full"></div>
-            Saving...
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span className="trades-body">Saving...</span>
           </>
         ) : (
           <>
-            <Check size={18} />
-            {saveText}
+            <Check size={20} />
+            <span className="trades-body">{saveText}</span>
           </>
         )}
       </button>

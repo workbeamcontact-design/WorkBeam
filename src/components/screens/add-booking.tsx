@@ -631,16 +631,23 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
       </div>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-16 left-0 right-0 px-4 py-4 bg-surface-alt z-10">
+      <div className="absolute bottom-20 left-0 right-0 px-4">
         <button
           onClick={handleStep1Continue}
           disabled={!formData.clientType || 
             (formData.clientType === 'existing' && !formData.selectedClientId) ||
             (formData.clientType === 'new' && (!formData.newClient?.name?.trim() || !formData.newClient?.phone?.trim()))
           }
-          className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 text-center"
+          className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+          style={{
+            backgroundColor: '#0A84FF',
+            color: 'white',
+            height: '56px',
+            borderRadius: '12px',
+            minHeight: '44px'
+          }}
         >
-          Continue to Booking Details
+          <span className="trades-body">Continue to Booking Details</span>
         </button>
       </div>
     </div>
@@ -862,29 +869,44 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
       </div>
 
       {/* Action Buttons */}
-      <div className="fixed bottom-16 left-0 right-0 px-4 py-4 bg-surface-alt z-10">
+      <div className="absolute bottom-20 left-0 right-0 px-4">
         <div className="flex gap-3">
           {!initialData?.startAtStep2 && (
             <button
               onClick={() => initialData?.startAtStep2 ? onBack() : setStep(1)}
               disabled={creatingBooking}
-              className="flex-1 bg-surface border-2 border-border text-ink py-4 rounded-xl trades-body font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 text-center"
+              className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+              style={{
+                backgroundColor: '#F9FAFB',
+                color: '#111827',
+                height: '56px',
+                borderRadius: '12px',
+                border: '2px solid #E5E7EB',
+                minHeight: '44px'
+              }}
             >
-              Back
+              <span className="trades-body">Back</span>
             </button>
           )}
           <button
             onClick={handleCreateBooking}
             disabled={creatingBooking || !formData.bookingType}
-            className={`bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${!initialData?.startAtStep2 ? 'flex-1' : 'w-full'}`}
+            className={`flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 ${!initialData?.startAtStep2 ? 'flex-1' : 'w-full'}`}
+            style={{
+              backgroundColor: '#0A84FF',
+              color: 'white',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
           >
             {creatingBooking ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {initialData?.editMode ? 'Updating...' : 'Creating...'}
+                <span className="trades-body">{initialData?.editMode ? 'Updating...' : 'Creating...'}</span>
               </>
             ) : (
-              initialData?.editMode ? 'Update' : 'Create'
+              <span className="trades-body">{initialData?.editMode ? 'Update' : 'Create'}</span>
             )}
           </button>
         </div>

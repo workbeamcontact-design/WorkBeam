@@ -492,17 +492,22 @@ export default function TeamManagement() {
 
       {/* Invite Member FAB */}
       {permissions.canInviteMembers && (
-        <div className="fixed bottom-16 left-0 right-0 px-4 py-4 z-10 pointer-events-none max-w-sm mx-auto md:max-w-[390px]">
-          <div className="pointer-events-auto">
-            <button
-              onClick={handleInviteMember}
-              disabled={availableSeats <= 0}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:bg-gray-300 flex items-center justify-center gap-2 shadow-lg"
-            >
-              <UserPlus className="w-4 h-4" />
-              {availableSeats <= 0 ? 'No Seats Available' : 'Invite Team Member'}
-            </button>
-          </div>
+        <div className="absolute bottom-20 left-0 right-0 px-4 z-10">
+          <button
+            onClick={handleInviteMember}
+            disabled={availableSeats <= 0}
+            className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
+            style={{
+              backgroundColor: availableSeats <= 0 ? '#D1D5DB' : '#0A84FF',
+              color: 'white',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
+          >
+            <UserPlus size={20} />
+            <span className="trades-body">{availableSeats <= 0 ? 'No Seats Available' : 'Invite Team Member'}</span>
+          </button>
         </div>
       )}
     </ScreenLayout>

@@ -1789,35 +1789,39 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
 
       {/* Floating Action Buttons - Show on Overview and Work Tabs */}
       {(activeTab === 'overview' || activeTab === 'work') && (
-        <div className="fixed bottom-20 inset-x-0 z-50">
-          <div className="max-w-[390px] mx-auto px-4">
-            <div className="flex gap-3">
-              {/* New Job Button */}
-              <button
-                onClick={handleNewJob}
-                className="flex-1 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                style={{
-                  height: '56px',
-                  minHeight: '44px'
-                }}
-              >
-                <Plus size={20} />
-                <span className="trades-body font-medium text-[16px]">New Job</span>
-              </button>
-              
-              {/* New Quote Button */}
-              <button
-                onClick={handleNewQuote}
-                className="flex-1 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-                style={{
-                  height: '56px',
-                  minHeight: '44px'
-                }}
-              >
-                <Quote size={20} />
-                <span className="trades-body font-medium text-[16px]">New Quote</span>
-              </button>
-            </div>
+        <div className="absolute bottom-20 left-0 right-0 px-4">
+          <div className="flex gap-3">
+            {/* New Job Button */}
+            <button
+              onClick={handleNewJob}
+              className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+              style={{
+                backgroundColor: '#0A84FF',
+                color: 'white',
+                height: '56px',
+                borderRadius: '12px',
+                minHeight: '44px'
+              }}
+            >
+              <Plus size={20} />
+              <span className="trades-body">New Job</span>
+            </button>
+            
+            {/* New Quote Button */}
+            <button
+              onClick={handleNewQuote}
+              className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg hover:shadow-xl"
+              style={{
+                backgroundColor: '#16A34A',
+                color: 'white',
+                height: '56px',
+                borderRadius: '12px',
+                minHeight: '44px'
+              }}
+            >
+              <Quote size={20} />
+              <span className="trades-body">New Quote</span>
+            </button>
           </div>
         </div>
       )}
