@@ -1154,9 +1154,13 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+              style={{
+                width: 'clamp(44px, 10.5vw, 48px)',
+                height: 'clamp(44px, 10.5vw, 48px)'
+              }}
             >
-              <ArrowLeft size={20} className="text-gray-600" />
+              <ArrowLeft style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} className="text-gray-600" />
             </button>
             <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Loading Client...</h1>
           </div>
@@ -1774,27 +1778,29 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
         <div className="fixed bottom-20 inset-x-0 z-50">
           <div className="max-w-[390px] mx-auto px-4">
             <div className="flex gap-3">
-              {/* New Job Button */}
+              {/* New Job Button - Responsive sizing */}
               <button
                 onClick={handleNewJob}
-                className="flex-1 h-14 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                 style={{
-                  minWidth: '140px'
+                  height: 'clamp(52px, 12vw, 56px)',
+                  minWidth: 'clamp(140px, 32vw, 160px)'
                 }}
               >
-                <Plus size={22} />
+                <Plus style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} />
                 <span className="trades-body font-medium text-[16px]">New Job</span>
               </button>
               
-              {/* New Quote Button */}
+              {/* New Quote Button - Responsive sizing */}
               <button
                 onClick={handleNewQuote}
-                className="flex-1 h-14 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                 style={{
-                  minWidth: '140px'
+                  height: 'clamp(52px, 12vw, 56px)',
+                  minWidth: 'clamp(140px, 32vw, 160px)'
                 }}
               >
-                <Quote size={22} />
+                <Quote style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} />
                 <span className="trades-body font-medium text-[16px]">New Quote</span>
               </button>
             </div>

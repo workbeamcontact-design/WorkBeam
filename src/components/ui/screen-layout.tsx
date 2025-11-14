@@ -100,16 +100,21 @@ export function SaveFooter({
       <button
         onClick={onSave}
         disabled={saving}
-        className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full bg-blue-600 text-white rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        style={{
+          height: 'clamp(52px, 12vw, 56px)',
+          paddingTop: 'clamp(12px, 3vw, 16px)',
+          paddingBottom: 'clamp(12px, 3vw, 16px)'
+        }}
       >
         {saving ? (
           <>
-            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+            <div className="animate-spin border-2 border-white border-t-transparent rounded-full" style={{ width: 'clamp(16px, 4vw, 18px)', height: 'clamp(16px, 4vw, 18px)' }}></div>
             Saving...
           </>
         ) : (
           <>
-            <Check className="w-4 h-4" />
+            <Check style={{ width: 'clamp(16px, 4vw, 18px)', height: 'clamp(16px, 4vw, 18px)' }} />
             {saveText}
           </>
         )}
