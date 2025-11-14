@@ -24,7 +24,7 @@ export function BottomNavigation({ activeTab, onTabChange, className }: BottomNa
         className
       )}
       style={{
-        height: 'clamp(64px, 15vw, 68px)'
+        height: 'clamp(60px, 16vw, 76px)'
       }}
     >
       {tabs.map(({ id, icon: Icon, label }) => (
@@ -39,11 +39,11 @@ export function BottomNavigation({ activeTab, onTabChange, className }: BottomNa
               : "text-gray-600 hover:text-gray-900"
           )}
           style={{
-            minWidth: 'clamp(44px, 10.5vw, 48px)',
-            minHeight: 'clamp(44px, 10.5vw, 48px)'
+            minWidth: 'clamp(40px, 11.2vw, 52px)',
+            minHeight: 'clamp(40px, 11.2vw, 52px)'
           }}
         >
-          <Icon style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} />
+          <Icon style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} />
           <span className="trades-caption truncate">{label}</span>
         </button>
       ))}

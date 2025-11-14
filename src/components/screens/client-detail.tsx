@@ -1156,11 +1156,11 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
               onClick={onBack}
               className="flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
               style={{
-                width: 'clamp(44px, 10.5vw, 48px)',
-                height: 'clamp(44px, 10.5vw, 48px)'
+                width: 'clamp(40px, 11.2vw, 52px)',
+                height: 'clamp(40px, 11.2vw, 52px)'
               }}
             >
-              <ArrowLeft style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} className="text-gray-600" />
+              <ArrowLeft style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} className="text-gray-600" />
             </button>
             <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Loading Client...</h1>
           </div>
@@ -1183,9 +1183,13 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+              style={{
+                width: 'clamp(40px, 11.2vw, 52px)',
+                height: 'clamp(40px, 11.2vw, 52px)'
+              }}
             >
-              <ArrowLeft size={20} className="text-gray-600" />
+              <ArrowLeft style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} className="text-gray-600" />
             </button>
             <h1 className="trades-h1" style={{ color: 'var(--ink)' }}>Client Not Found</h1>
           </div>
@@ -1212,9 +1216,13 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+            style={{
+              width: 'clamp(40px, 11.2vw, 52px)',
+              height: 'clamp(40px, 11.2vw, 52px)'
+            }}
           >
-            <ArrowLeft size={20} className="text-gray-600" />
+            <ArrowLeft style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} className="text-gray-600" />
           </button>
           <div className="flex-1">
             <div className="flex items-center gap-2 trades-caption text-gray-600 mb-1">
@@ -1783,11 +1791,11 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
                 onClick={handleNewJob}
                 className="flex-1 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                 style={{
-                  height: 'clamp(52px, 12vw, 56px)',
-                  minWidth: 'clamp(140px, 32vw, 160px)'
+                  height: 'clamp(48px, 13vw, 62px)',
+                  minWidth: 'clamp(130px, 35vw, 170px)'
                 }}
               >
-                <Plus style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} />
+                <Plus style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} />
                 <span className="trades-body font-medium text-[16px]">New Job</span>
               </button>
               
@@ -1796,11 +1804,11 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
                 onClick={handleNewQuote}
                 className="flex-1 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                 style={{
-                  height: 'clamp(52px, 12vw, 56px)',
-                  minWidth: 'clamp(140px, 32vw, 160px)'
+                  height: 'clamp(48px, 13vw, 62px)',
+                  minWidth: 'clamp(130px, 35vw, 170px)'
                 }}
               >
-                <Quote style={{ width: 'clamp(20px, 5vw, 24px)', height: 'clamp(20px, 5vw, 24px)' }} />
+                <Quote style={{ width: 'clamp(18px, 5.6vw, 26px)', height: 'clamp(18px, 5.6vw, 26px)' }} />
                 <span className="trades-body font-medium text-[16px]">New Quote</span>
               </button>
             </div>

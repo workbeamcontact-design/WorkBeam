@@ -14,12 +14,15 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
         "absolute bottom-20 right-4 bg-blue-600 text-white rounded-full",
         "shadow-lg hover:bg-blue-700 transition-colors",
         "flex items-center justify-center z-40",
-        // Responsive sizing: scales with viewport width
-        "w-[13vw] h-[13vw] min-w-[56px] min-h-[56px] max-w-[64px] max-h-[64px]",
         className
       )}
+      style={{
+        // Responsive sizing: 56px at 390px (iPhone 16) → 62px at 430px (Pro Max)
+        width: 'clamp(45px, 14.4vw, 70px)',
+        height: 'clamp(45px, 14.4vw, 70px)'
+      }}
     >
-      <Plus className="w-[5.5vw] h-[5.5vw] min-w-[24px] min-h-[24px] max-w-[28px] max-h-[28px]" />
+      <Plus style={{ width: 'clamp(20px, 5.6vw, 28px)', height: 'clamp(20px, 5.6vw, 28px)' }} />
     </button>
   );
 }
