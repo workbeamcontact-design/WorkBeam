@@ -93,7 +93,10 @@ app.get('/make-server-20084ff3/subscription/status', async (c) => {
     const subscriptionKey = `subscription:${user.id}`;
     const subscription = await kv.get(subscriptionKey);
 
+    console.log('📊 Subscription data from KV:', subscription);
+
     if (!subscription) {
+      console.log('❌ No subscription found in KV for user:', user.id);
       return c.json({
         success: true,
         data: {
@@ -105,10 +108,13 @@ app.get('/make-server-20084ff3/subscription/status', async (c) => {
       });
     }
 
+    const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+    console.log(`✅ Subscription found - Status: ${subscription.status}, Active: ${isActive}`);
+
     return c.json({
       success: true,
       data: {
-        active: subscription.status === 'active' || subscription.status === 'trialing',
+        active: isActive,
         status: subscription.status,
         trial_end: subscription.trial_end,
         current_period_end: subscription.current_period_end,
@@ -192,6 +198,13 @@ app.post('/make-server-20084ff3/subscription/create-checkout', async (c) => {
       allow_promotion_codes: true,
     });
 
+    console.log('✅ Created checkout session:', {
+      sessionId: session.id,
+      userId: user.id,
+      customerId,
+      priceId
+    });
+
     return c.json({
       success: true,
       data: {
@@ -206,6 +219,114 @@ app.post('/make-server-20084ff3/subscription/create-checkout', async (c) => {
       error: error instanceof Error ? error.message : 'Failed to create checkout session' 
     }, 500);
   }
+});
+
+// Manual subscription sync endpoint (backup for when webhooks fail)
+app.post('/make-server-20084ff3/subscription/sync', async (c) => {
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+
+    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+    if (error || !user?.id) {
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
+    }
+
+    console.log('🔄 Manual sync requested for user:', user.id, 'email:', user.email);
+
+    const stripe = getStripe();
+    const subscriptionKey = `subscription:${user.id}`;
+    const existingData = await kv.get(subscriptionKey);
+
+    let customerId = existingData?.stripe_customer_id;
+
+    // If no customer ID in KV, search Stripe by email
+    if (!customerId) {
+      console.log('🔍 No customer ID in KV - searching Stripe by email:', user.email);
+      
+      const customers = await stripe.customers.list({
+        email: user.email,
+        limit: 1
+      });
+
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        console.log('✅ Found customer in Stripe:', customerId);
+      } else {
+        console.log('❌ No customer found in Stripe for email:', user.email);
+        return c.json({
+          success: false,
+          error: 'No subscription found - checkout may not be complete'
+        }, 404);
+      }
+    }
+
+    // Fetch all subscriptions for this customer from Stripe
+    console.log('📡 Fetching subscriptions from Stripe for customer:', customerId);
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      limit: 1,
+      status: 'all'
+    });
+
+    if (subscriptions.data.length === 0) {
+      console.log('❌ No subscriptions found in Stripe for customer:', customerId);
+      return c.json({
+        success: false,
+        error: 'No subscription found in Stripe'
+      }, 404);
+    }
+
+    const subscription = subscriptions.data[0];
+    console.log('✅ Found subscription in Stripe:', {
+      id: subscription.id,
+      status: subscription.status,
+      trial_end: subscription.trial_end,
+      customer: customerId
+    });
+
+    // Update KV with latest data
+    await updateSubscriptionInKV(user.id, subscription, customerId);
+
+    return c.json({
+      success: true,
+      data: {
+        active: subscription.status === 'active' || subscription.status === 'trialing',
+        status: subscription.status,
+        trial_end: subscription.trial_end,
+        current_period_end: subscription.current_period_end,
+        plan: subscription.items.data[0]?.price.id,
+        cancel_at_period_end: subscription.cancel_at_period_end
+      }
+    });
+  } catch (error) {
+    console.log('Error syncing subscription:', error);
+    return c.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to sync subscription' 
+    }, 500);
+  }
+});
+
+// Test endpoint to verify webhook setup
+app.get('/make-server-20084ff3/subscription/webhook-status', async (c) => {
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  
+  return c.json({
+    success: true,
+    data: {
+      webhookSecretConfigured: !!webhookSecret,
+      webhookSecretLength: webhookSecret?.length || 0,
+      webhookSecretPrefix: webhookSecret?.substring(0, 7) || 'NOT_SET',
+      message: webhookSecret 
+        ? 'Webhook secret is configured' 
+        : 'WARNING: Webhook secret is NOT configured!'
+    }
+  });
 });
 
 // Create Stripe Customer Portal Session
@@ -285,7 +406,7 @@ app.post('/make-server-20084ff3/subscription/webhook', async (c) => {
       return c.json({ success: false, error: 'Invalid signature' }, 400);
     }
 
-    console.log('Processing Stripe webhook event:', event.type);
+    console.log('🔔 Processing Stripe webhook event:', event.type);
 
     // Handle different event types
     switch (event.type) {
@@ -293,9 +414,25 @@ app.post('/make-server-20084ff3/subscription/webhook', async (c) => {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.supabase_user_id;
         
+        console.log('💳 Checkout completed:', {
+          sessionId: session.id,
+          userId,
+          subscriptionId: session.subscription,
+          customerId: session.customer,
+          paymentStatus: session.payment_status
+        });
+        
         if (userId && session.subscription) {
+          console.log('📥 Retrieving subscription from Stripe...');
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          console.log('✅ Retrieved subscription:', {
+            id: subscription.id,
+            status: subscription.status,
+            trial_end: subscription.trial_end
+          });
           await updateSubscriptionInKV(userId, subscription, session.customer as string);
+        } else {
+          console.warn('⚠️ Missing userId or subscription in checkout session:', { userId, subscription: session.subscription });
         }
         break;
       }
@@ -305,8 +442,17 @@ app.post('/make-server-20084ff3/subscription/webhook', async (c) => {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.supabase_user_id;
         
+        console.log(`📝 Subscription ${event.type === 'customer.subscription.created' ? 'created' : 'updated'}:`, {
+          subscriptionId: subscription.id,
+          userId,
+          status: subscription.status,
+          trial_end: subscription.trial_end
+        });
+        
         if (userId) {
           await updateSubscriptionInKV(userId, subscription, subscription.customer as string);
+        } else {
+          console.warn('⚠️ Missing userId in subscription metadata');
         }
         break;
       }
@@ -314,6 +460,11 @@ app.post('/make-server-20084ff3/subscription/webhook', async (c) => {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.supabase_user_id;
+        
+        console.log('🗑️ Subscription deleted:', {
+          subscriptionId: subscription.id,
+          userId
+        });
         
         if (userId) {
           await updateSubscriptionInKV(userId, subscription, subscription.customer as string);
@@ -367,8 +518,20 @@ async function updateSubscriptionInKV(
     updated_at: new Date().toISOString()
   };
 
+  console.log('💾 Saving subscription to KV:', {
+    key: subscriptionKey,
+    userId,
+    status: subscription.status,
+    subscriptionId: subscription.id
+  });
+
   await kv.set(subscriptionKey, subscriptionData);
-  console.log('Updated subscription in KV for user:', userId, 'Status:', subscription.status);
+  
+  console.log('✅ Successfully saved subscription to KV for user:', userId, 'Status:', subscription.status);
+  
+  // Verify it was saved
+  const verification = await kv.get(subscriptionKey);
+  console.log('🔍 Verification - Data in KV:', verification ? 'EXISTS' : 'NOT FOUND', verification?.status);
 }
 
 // =============================================================================

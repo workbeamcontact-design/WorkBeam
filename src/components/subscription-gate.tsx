@@ -14,6 +14,8 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
   const [loading, setLoading] = useState(true);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [syncAttempted, setSyncAttempted] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // PRODUCTION MODE: Subscription required
   const DEV_MODE_BYPASS = false;
@@ -51,54 +53,107 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
       return;
     }
 
-    loadSubscription();
-
-    // Check for subscription success/cancel in URL
+    // Check for subscription success/cancel in URL FIRST
     const params = new URLSearchParams(window.location.search);
     const subscriptionParam = params.get('subscription');
     
     if (subscriptionParam === 'success') {
-      // Remove the parameter and poll for subscription activation
+      // Remove the parameter from URL
       window.history.replaceState({}, '', window.location.pathname);
-      console.log('🎉 Returned from Stripe checkout - waiting for subscription activation...');
+      console.log('🎉 Returned from Stripe checkout - syncing subscription...');
       
-      // Poll for subscription status every 2 seconds for up to 30 seconds
-      let pollAttempts = 0;
-      const maxAttempts = 15;
+      // Keep loading state TRUE while syncing
+      setLoading(true);
       
-      const pollInterval = setInterval(async () => {
-        pollAttempts++;
-        console.log(`Polling for subscription... (attempt ${pollAttempts}/${maxAttempts})`);
-        
+      // First, try to force sync from Stripe immediately (in case webhook hasn't fired)
+      const performSync = async () => {
         try {
-          const status = await SubscriptionAPI.getStatus();
+          console.log('🔄 Attempting to sync subscription from Stripe...');
+          setSyncAttempted(true);
+          setDebugInfo('Searching for your subscription in Stripe...');
+          
+          const status = await SubscriptionAPI.syncFromStripe();
           
           if (status.active) {
-            console.log('✅ Subscription activated!');
-            clearInterval(pollInterval);
+            console.log('✅ Subscription activated via manual sync!', status);
+            setDebugInfo('');
             setSubscription(status);
             setLoading(false);
-          } else if (pollAttempts >= maxAttempts) {
-            console.warn('⚠️ Subscription not activated after polling - webhook may be delayed');
-            clearInterval(pollInterval);
-            // Show the status anyway and let user proceed
-            setSubscription(status);
-            setLoading(false);
+            return true;
+          } else {
+            console.log('⚠️ Sync completed but subscription not active:', status);
+            setDebugInfo(`Found subscription but status is: ${status.status}`);
+            return false;
           }
-        } catch (err) {
-          console.error('Error polling subscription:', err);
-          if (pollAttempts >= maxAttempts) {
-            clearInterval(pollInterval);
-            setLoading(false);
-          }
+        } catch (error) {
+          console.error('❌ Manual sync failed:', error);
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          setDebugInfo(`Sync failed: ${errorMsg}`);
+          return false;
         }
-      }, 2000);
+      };
       
-      // Clean up interval on unmount
-      return () => clearInterval(pollInterval);
+      // Try immediate sync
+      performSync().then(async (syncSuccess) => {
+        if (syncSuccess) {
+          return; // Success! We're done
+        }
+        
+        // If sync didn't work, fall back to polling
+        console.log('📡 Manual sync did not activate subscription - falling back to polling...');
+        
+        let pollAttempts = 0;
+        const maxAttempts = 15;
+        
+        const pollInterval = setInterval(async () => {
+          pollAttempts++;
+          console.log(`📡 Polling for subscription... (attempt ${pollAttempts}/${maxAttempts})`);
+          
+          try {
+            const status = await SubscriptionAPI.getStatus();
+            console.log('Subscription status:', status);
+            
+            if (status.active) {
+              console.log('✅ Subscription activated via polling!', status);
+              clearInterval(pollInterval);
+              setSubscription(status);
+              setLoading(false);
+            } else if (pollAttempts >= maxAttempts) {
+              console.warn('⚠️ Subscription not activated after 30 seconds');
+              console.warn('Current status:', status);
+              clearInterval(pollInterval);
+              setDebugInfo('Subscription activation taking longer than expected. Please contact support if this continues.');
+              // Final attempt - force sync one more time
+              try {
+                const finalStatus = await SubscriptionAPI.syncFromStripe();
+                setSubscription(finalStatus);
+              } catch {
+                setSubscription(status);
+              }
+              setLoading(false);
+            } else {
+              setDebugInfo(`Waiting for activation... (${pollAttempts}/${maxAttempts})`);
+            }
+          } catch (err) {
+            console.error('Error polling subscription:', err);
+            if (pollAttempts >= maxAttempts) {
+              console.error('Polling failed - loading subscription normally');
+              clearInterval(pollInterval);
+              await loadSubscription();
+            }
+          }
+        }, 2000);
+      });
+      
+      // No cleanup needed as we're not returning an interval directly
+      return;
     } else if (subscriptionParam === 'canceled') {
       window.history.replaceState({}, '', window.location.pathname);
       console.log('❌ Checkout canceled by user');
+      loadSubscription();
+    } else {
+      // Normal flow - just load subscription
+      loadSubscription();
     }
   }, []);
 
@@ -132,10 +187,22 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
   // Show loading spinner while checking subscription
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-surface">
-        <div className="text-center">
+      <div className="flex items-center justify-center h-full bg-surface p-4">
+        <div className="text-center max-w-md">
           <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
-          <p className="trades-body text-muted">Loading...</p>
+          <p className="trades-body text-muted mb-2">
+            {syncAttempted ? 'Activating your subscription...' : 'Loading...'}
+          </p>
+          {debugInfo && (
+            <p className="trades-caption text-muted mt-2 bg-surface-alt p-3 rounded-lg">
+              {debugInfo}
+            </p>
+          )}
+          {syncAttempted && (
+            <p className="trades-caption text-muted mt-4 opacity-60">
+              This may take up to 30 seconds
+            </p>
+          )}
         </div>
       </div>
     );
@@ -183,6 +250,36 @@ export function SubscriptionGate({ children }: SubscriptionGateProps) {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-success/10 rounded-full">
               <span className="trades-body text-success">✨ 14-day free trial • Cancel anytime</span>
             </div>
+            
+            {/* Show retry button if user attempted checkout but it failed */}
+            {syncAttempted && !loading && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="trades-caption text-yellow-800 mb-2">
+                  ⚠️ We couldn't verify your subscription. If you just completed checkout, please try syncing again.
+                </p>
+                <Button
+                  onClick={async () => {
+                    setLoading(true);
+                    setDebugInfo('Retrying sync...');
+                    try {
+                      const status = await SubscriptionAPI.syncFromStripe();
+                      setSubscription(status);
+                      if (!status.active) {
+                        setDebugInfo('Still no active subscription found. Please contact support.');
+                      }
+                    } catch (err) {
+                      setDebugInfo('Sync failed. Please contact support with your email address.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  variant="outline"
+                  className="w-full mt-2"
+                >
+                  🔄 Retry Sync
+                </Button>
+              </div>
+            )}
             {window.self !== window.top && (
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="trades-caption text-blue-800">

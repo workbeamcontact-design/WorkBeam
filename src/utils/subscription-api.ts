@@ -46,6 +46,28 @@ export class SubscriptionAPI {
     }
   }
 
+  // Force sync subscription from Stripe (fallback for webhook failures)
+  static async syncFromStripe(): Promise<SubscriptionStatus> {
+    try {
+      const headers = await this.getAuthHeaders();
+      const response = await fetch(`${API_BASE_URL}/subscription/sync`, {
+        method: 'POST',
+        headers,
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to sync subscription');
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('Error syncing subscription from Stripe:', error);
+      throw error;
+    }
+  }
+
   // Create checkout session and redirect to Stripe
   static async createCheckoutSession(priceId: string): Promise<void> {
     try {
