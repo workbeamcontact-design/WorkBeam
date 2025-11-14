@@ -15,6 +15,7 @@ import { formatPhoneForWhatsApp } from "../../utils/phone-utils";
 import { toast } from "sonner@2.0.3";
 import { useAuth } from "../../utils/auth-context";
 import { AttributionDisplay } from "../ui/attribution-display";
+import { useAppStore } from "../../hooks/useAppStore";
 
 interface ClientDetailProps {
   client: any; // Can be full client object OR just { id: string }
@@ -63,25 +64,6 @@ interface PaymentRecordingState {
 export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientDetailProps) {
   const { user } = useAuth();
   
-  // DEBUG: Log every render
-  console.log('🔍 ClientDetail RENDER:', {
-    hasClientProp: !!clientProp,
-    clientPropType: typeof clientProp,
-    clientPropValue: clientProp,
-    isNull: clientProp === null,
-    isUndefined: clientProp === undefined
-  });
-  
-  // CRITICAL: Handle page refresh scenario
-  // When user refreshes on client-detail, Zustand persist sets data to null
-  // but keeps screen as 'client-detail'. We need to redirect immediately.
-  useEffect(() => {
-    if (!clientProp) {
-      console.error('❌ ClientDetail mounted with no client data (likely page refresh). Redirecting to clients list.');
-      onNavigate('clients');
-    }
-  }, [clientProp, onNavigate]);
-  
   // Client data state - will be fetched if only ID is provided
   const [client, setClient] = useState<any>(null);
   const [clientLoading, setClientLoading] = useState(true);
@@ -107,7 +89,7 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
   const [financialSummary, setFinancialSummary] = useState<ClientFinancialSummary | null>(null);
 
   // Watch for refresh trigger from app store
-  const { clientDetailRefreshKey } = require('../../hooks/useAppStore').useAppStore();
+  const { clientDetailRefreshKey } = useAppStore();
 
   // STEP 1: Fetch full client data if only ID was provided
   // This handles the case where Zustand's persist middleware wipes the navigation data
@@ -1163,20 +1145,6 @@ export function ClientDetail({ client: clientProp, onNavigate, onBack }: ClientD
       setDeleting(false);
     }
   };
-
-  // Guard: If no client prop, show loading while redirect happens
-  if (!clientProp) {
-    return (
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <p className="trades-body text-gray-600">Redirecting...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Show loading state while fetching client data
   if (clientLoading) {

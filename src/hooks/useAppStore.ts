@@ -408,47 +408,7 @@ export const useAppStore = create<AppState>()(
         },
         calendarRefreshKey: state.calendarRefreshKey,
         lastUpdated: state.lastUpdated
-      }),
-      onRehydrateStorage: () => {
-        console.log('🔄 Zustand: BEFORE rehydration');
-        
-        return (state) => {
-          console.log('🔄 Zustand: AFTER rehydration, checking state...', {
-            hasState: !!state,
-            screen: state?.navigation?.screen,
-            hasData: !!state?.navigation?.data
-          });
-          
-          if (!state) return;
-          
-          // Check if we're on a screen that requires data but data is null
-          const screensRequiringData = [
-            'client-detail', 'job-detail', 'quote-detail', 'quote-preview',
-            'invoice-detail', 'record-payment', 'edit-client', 'booking-detail'
-          ];
-          
-          if (screensRequiringData.includes(state.navigation.screen) && !state.navigation.data) {
-            console.warn(`⚠️ Rehydrated on ${state.navigation.screen} without data (page refresh). Redirecting to safe screen.`);
-            
-            // Redirect to appropriate parent screen
-            const screen = state.navigation.screen;
-            let safeScreen: Screen = 'dashboard';
-            
-            if (screen.includes('client')) safeScreen = 'clients';
-            else if (screen.includes('job') || screen.includes('quote')) safeScreen = 'clients';
-            else if (screen.includes('invoice')) safeScreen = 'invoice-list';
-            else if (screen.includes('booking')) safeScreen = 'calendar';
-            
-            console.log(`✅ Redirecting to safe screen: ${safeScreen}`);
-            
-            state.navigation = {
-              screen: safeScreen,
-              data: null,
-              history: []
-            };
-          }
-        };
-      }
+      })
     }
   )
 );
