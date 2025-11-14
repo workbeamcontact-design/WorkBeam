@@ -190,6 +190,8 @@ app.post('/make-server-20084ff3/subscription/create-checkout', async (c) => {
       },
       // Allow promotion codes (optional - for future discount codes)
       allow_promotion_codes: true,
+      // Only collect payment method if payment is required (skips card details for 100% discounts)
+      payment_method_collection: 'if_required',
     });
 
     return c.json({

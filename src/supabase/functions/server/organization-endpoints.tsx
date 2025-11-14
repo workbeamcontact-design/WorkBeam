@@ -41,7 +41,10 @@ app.post('/organization/auto-setup', async (c) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
 
     if (authError || !user) {
-      console.error('Auto-setup auth error:', authError);
+      // Only log as error if it's not a missing session (which is normal for unauthenticated requests)
+      if (authError && authError.name !== 'AuthSessionMissingError') {
+        console.error('Auto-setup auth error:', authError);
+      }
       return c.json({ 
         success: false, 
         error: 'Unauthorized' 

@@ -103,8 +103,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSessionReady(true);
           
           // NEW (Phase 3): Ensure user has organization
+          // Only run if we have a valid user session (not on initial page load)
           try {
             console.log('🏢 [Phase 3] Checking/creating organization for existing session...');
+            
+            // Wait a moment to ensure session is fully established
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             const orgInfo = await ensureUserHasOrganization({
               id: session.user.id,
               email: session.user.email,

@@ -178,10 +178,15 @@ class ApiClient {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         
-        // 404 errors are expected in many cases (deleted items, etc.) - log as warning
-        if (response.status === 404) {
+        // 401 and 404 errors are expected in many cases - log as info/warning, not errors
+        if (response.status === 401) {
+          // 401 Unauthorized is expected when user is not logged in or session expired
+          console.log(`ℹ️ API Unauthorized (401) - User not authenticated`);
+        } else if (response.status === 404) {
+          // 404 Not Found is expected when items don't exist (deleted items, etc.)
           console.warn(`⚠️ API Not Found (404):`, errorData);
         } else {
+          // Other errors (500, 403, etc.) are actual errors
           console.error(`❌ API Error: ${response.status}`, errorData);
         }
         

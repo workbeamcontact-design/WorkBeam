@@ -78,13 +78,25 @@ const initErrorInterceptorImmediately = () => {
   
   console.error = (...args) => {
     const message = args[0];
+    const secondArg = args[1];
+    
+    // Check for 401 errors in various formats
+    const is401Error = (
+      (typeof message === 'string' && message.includes('API Error: 401')) ||
+      (typeof message === 'string' && message.includes('401') && 
+       secondArg && typeof secondArg === 'object' && secondArg.error === 'Unauthorized') ||
+      (secondArg && typeof secondArg === 'object' && 
+       (secondArg.error === 'Unauthorized' || secondArg.status === 401))
+    );
+    
     if (typeof message === 'string' && (
       message.includes('circular structure') ||
       message.includes('Converting circular structure') ||
       message.includes('JSON.stringify') ||
-      message.includes('circular reference')
+      message.includes('circular reference') ||
+      is401Error
     )) {
-      // Silently handle circular reference errors
+      // Silently handle circular reference errors and expected 401 auth errors
       return;
     }
     originalConsoleError.apply(console, args);

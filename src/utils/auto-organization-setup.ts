@@ -63,6 +63,12 @@ export async function ensureUserHasOrganization(user: {
 
     // 🔍 DEBUG: Log full response
     console.log('🔍 Auto-setup response:', JSON.stringify(response, null, 2));
+    
+    // Handle 401 Unauthorized errors silently (user not logged in or session expired)
+    if (!response.success && response.error?.includes('Unauthorized')) {
+      console.log('ℹ️ User not authenticated, skipping organization setup');
+      return null;
+    }
 
     if (response.success && response.data) {
       if (response.data.created) {
