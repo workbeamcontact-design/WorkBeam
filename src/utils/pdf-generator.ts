@@ -72,6 +72,7 @@ interface CompanyData {
 }
 
 import { api } from "./api";
+import { toast } from 'sonner@2.0.3';
 
 // Default company data - fallback when no business details are saved
 const DEFAULT_COMPANY: CompanyData = {
@@ -799,14 +800,17 @@ export async function downloadQuotePDF(
   client: ClientData, 
   company?: CompanyData
 ): Promise<void> {
-  // Ensure client has a name
-  if (!client.name && typeof client === 'string') {
-    client = { name: client };
-  } else if (!client.name) {
-    client.name = 'Unknown Client';
-  }
+  const loadingToast = toast.loading('Downloading quote...');
+  
+  try {
+    // Ensure client has a name
+    if (!client.name && typeof client === 'string') {
+      client = { name: client };
+    } else if (!client.name) {
+      client.name = 'Unknown Client';
+    }
 
-  const businessDetails = company || await getBusinessDetails();
+    const businessDetails = company || await getBusinessDetails();
   const generator = new PDFGenerator();
   const dataURL = generator.generateQuotePDF(quote, client, businessDetails);
   
@@ -821,6 +825,14 @@ export async function downloadQuotePDF(
   document.body.removeChild(link);
   
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  
+    toast.dismiss(loadingToast);
+    toast.success('Quote downloaded');
+  } catch (error) {
+    toast.dismiss(loadingToast);
+    toast.error('Failed to download quote');
+    throw error;
+  }
 }
 
 /**
@@ -831,15 +843,18 @@ export async function downloadInvoicePDF(
   client: ClientData, 
   company?: CompanyData
 ): Promise<void> {
-  // Ensure client has a name
-  if (!client.name && typeof client === 'string') {
-    client = { name: client };
-  } else if (!client.name) {
-    client.name = 'Unknown Client';
-  }
+  const loadingToast = toast.loading('Downloading invoice...');
+  
+  try {
+    // Ensure client has a name
+    if (!client.name && typeof client === 'string') {
+      client = { name: client };
+    } else if (!client.name) {
+      client.name = 'Unknown Client';
+    }
 
-  const businessDetails = company || await getBusinessDetails();
-  const bankDetails = await getBankDetails();
+    const businessDetails = company || await getBusinessDetails();
+    const bankDetails = await getBankDetails();
   const generator = new PDFGenerator();
   const dataURL = generator.generateInvoicePDF(invoice, client, businessDetails, bankDetails);
   
@@ -854,6 +869,14 @@ export async function downloadInvoicePDF(
   document.body.removeChild(link);
   
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  
+    toast.dismiss(loadingToast);
+    toast.success('Invoice downloaded');
+  } catch (error) {
+    toast.dismiss(loadingToast);
+    toast.error('Failed to download invoice');
+    throw error;
+  }
 }
 
 /**

@@ -8,6 +8,7 @@ import { createRoot } from 'react-dom/client';
 import { TemplateRenderer } from '../components/ui/invoice-templates/template-renderer';
 import { BrandingProvider } from './branding-context';
 import { api } from './api';
+import { toast } from 'sonner@2.0.3';
 
 // Import jsPDF for actual PDF generation
 import jsPDF from 'jspdf';
@@ -556,6 +557,8 @@ export async function downloadQuotePDFWithTemplate(
   quote: QuoteData,
   client: ClientData
 ): Promise<void> {
+  const loadingToast = toast.loading('Downloading quote...');
+  
   try {
     const pdfBlob = await generateQuotePDFWithTemplate(quote, client);
     
@@ -572,8 +575,13 @@ export async function downloadQuotePDFWithTemplate(
     // Clean up
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     
+    toast.dismiss(loadingToast);
+    toast.success('Quote downloaded');
+    
   } catch (error) {
     console.error('Failed to download quote PDF:', error);
+    toast.dismiss(loadingToast);
+    toast.error('Failed to download quote');
     throw error;
   }
 }

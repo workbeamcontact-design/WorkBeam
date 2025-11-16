@@ -12,6 +12,7 @@ import { TemplateRenderer } from '../components/ui/invoice-templates/template-re
 import { BrandingProvider } from './branding-context';
 import { api } from './api';
 import { generateFileName, formatClientName, formatJobTitle } from './document-naming';
+import { toast } from 'sonner@2.0.3';
 
 // Import jsPDF for actual PDF generation (same as quote system)
 import jsPDF from 'jspdf';
@@ -550,6 +551,8 @@ export async function downloadTemplatePDF(
   branding: any,
   bankDetails?: any
 ): Promise<void> {
+  const loadingToast = toast.loading(`Downloading ${documentType}...`);
+  
   try {
     // Generate the actual PDF blob using jsPDF (same as quote system)
     const pdfBlob = await generateTemplatePDF(templateId, documentData, documentType, branding, bankDetails);
@@ -597,8 +600,13 @@ export async function downloadTemplatePDF(
     
     console.log('📄 Downloaded PDF with filename:', fileName);
     
+    toast.dismiss(loadingToast);
+    toast.success(`${documentType === 'invoice' ? 'Invoice' : 'Quote'} downloaded`);
+    
   } catch (error) {
     console.error('Failed to generate PDF:', error);
+    toast.dismiss(loadingToast);
+    toast.error(`Failed to download ${documentType}`);
     throw error;
   }
 }
@@ -766,6 +774,8 @@ export async function downloadQuotePDFWithTemplate(
   quote: any,
   client: any
 ): Promise<void> {
+  const loadingToast = toast.loading('Downloading quote...');
+  
   try {
     const pdfBlob = await generateQuoteWithTemplate(quote, client);
     
@@ -796,8 +806,13 @@ export async function downloadQuotePDFWithTemplate(
     
     console.log('📄 Downloaded quote PDF with filename:', fileName);
     
+    toast.dismiss(loadingToast);
+    toast.success('Quote downloaded');
+    
   } catch (error) {
     console.error('Failed to download quote PDF:', error);
+    toast.dismiss(loadingToast);
+    toast.error('Failed to download quote');
     throw error;
   }
 }
