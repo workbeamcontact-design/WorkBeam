@@ -263,7 +263,7 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
       </div>
 
       {/* Content */}
-      <div className="content_scroll flex-1 overflow-y-auto p-4 pb-32 space-y-6">
+      <div className="content_scroll flex-1 overflow-y-auto p-4 pb-40 space-y-6">
         {/* Info banner when amount is pre-filled from "Mark as Paid" */}
         {invoice?.suggestedAmount && invoice.suggestedAmount === currentBalance && (
           <div className="p-4 rounded-xl flex items-start gap-3" style={{ backgroundColor: 'rgba(10, 132, 255, 0.05)', border: '1px solid rgba(10, 132, 255, 0.2)' }}>

@@ -284,7 +284,7 @@ async function createActualPDF(htmlElement: HTMLElement, filename: string): Prom
     // Configure html2canvas for dynamic height rendering with timeout
     const canvas = await Promise.race([
       html2canvas(htmlElement, {
-      scale: 3, // High quality for crisp text in PDFs
+      scale: 2.5, // Optimized balance between quality and speed
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -587,7 +587,10 @@ export async function downloadQuoteWithTemplateAndOpenWhatsApp(
   whatsappPhone?: string
 ): Promise<void> {
   try {
-    // Open WhatsApp FIRST (must be synchronous to avoid popup blocking)
+    // Download the PDF FIRST
+    await downloadQuotePDFWithTemplate(quote, client);
+    
+    // Then open WhatsApp with message if phone provided
     if (whatsappPhone) {
       const formattedTotal = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(quote.total);
       const validUntilDate = quote.validUntil ? new Date(quote.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
@@ -610,14 +613,12 @@ export async function downloadQuoteWithTemplateAndOpenWhatsApp(
       
       const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
       
-      // Open WhatsApp immediately (synchronously) to avoid popup blocking
-      console.log('Opening WhatsApp with phone:', whatsappPhone);
-      console.log('WhatsApp URL:', whatsappUrl);
-      window.open(whatsappUrl, '_blank');
+      // Small delay to allow download to start before opening WhatsApp
+      setTimeout(() => {
+        console.log('Opening WhatsApp with phone:', whatsappPhone);
+        window.open(whatsappUrl, '_blank');
+      }, 500);
     }
-    
-    // Then download the PDF (can be async)
-    await downloadQuotePDFWithTemplate(quote, client);
     
   } catch (error) {
     console.error('Failed to generate quote with template and open WhatsApp:', error);

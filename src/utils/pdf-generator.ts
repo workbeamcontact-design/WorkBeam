@@ -689,18 +689,6 @@ export async function downloadQuoteAndOpenWhatsApp(
     const blob = dataURLToBlob(dataURL);
     const url = URL.createObjectURL(blob);
     
-    // Open WhatsApp FIRST (must be synchronous to avoid popup blocking)
-    if (whatsappPhone) {
-      const message = `Hi ${client.name}, I've just sent you your quote for ${quote.title}. The total is ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(quote.total)}. Please see the attached quote document and let me know if you have any questions!`;
-      
-      const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
-      
-      // Open WhatsApp immediately (synchronously) to avoid popup blocking
-      console.log('Opening WhatsApp (legacy) with phone:', whatsappPhone);
-      console.log('WhatsApp URL:', whatsappUrl);
-      window.open(whatsappUrl, '_blank');
-    }
-    
     // Create download link
     const link = document.createElement('a');
     link.href = url;
@@ -711,6 +699,19 @@ export async function downloadQuoteAndOpenWhatsApp(
     
     // Clean up
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    
+    // Then open WhatsApp after download starts
+    if (whatsappPhone) {
+      const message = `Hi ${client.name}, I've just sent you your quote for ${quote.title}. The total is ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(quote.total)}. Please see the attached quote document and let me know if you have any questions!`;
+      
+      const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+      
+      // Small delay to allow download to start before opening WhatsApp
+      setTimeout(() => {
+        console.log('Opening WhatsApp (legacy) with phone:', whatsappPhone);
+        window.open(whatsappUrl, '_blank');
+      }, 500);
+    }
     
   } catch (error) {
     console.error('Failed to generate quote PDF:', error);
