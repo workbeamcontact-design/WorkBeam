@@ -186,7 +186,7 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
       console.log('💰 Recording payment:', {
         invoiceId: invoiceId,
         amount: paymentData.amount,
-        clientName: invoice.client || 'Unknown Client',
+        clientName: typeof invoice.client === 'string' ? invoice.client : invoice.client?.name || invoice.clientName || 'Unknown Client',
         invoiceNumber: invoice.number || 'Draft',
         newStatus,
         totalPaid: newTotalPaid,
@@ -257,7 +257,7 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
         <div>
           <h1 className="trades-h2" style={{ color: 'var(--ink)' }}>Record Payment</h1>
           <p className="trades-caption" style={{ color: 'var(--muted)' }}>
-            {invoice.number || "Draft"} • {invoice.client}
+            {invoice.number || "Draft"} • {typeof invoice.client === 'string' ? invoice.client : invoice.client?.name || invoice.clientName || 'Unknown Client'}
           </p>
         </div>
       </div>
