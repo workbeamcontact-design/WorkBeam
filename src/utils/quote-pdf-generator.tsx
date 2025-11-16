@@ -285,7 +285,7 @@ async function createActualPDF(htmlElement: HTMLElement, filename: string): Prom
     // Configure html2canvas for dynamic height rendering with timeout
     const canvas = await Promise.race([
       html2canvas(htmlElement, {
-      scale: 2.5, // Optimized balance between quality and speed
+      scale: 3, // High quality for crisp text in PDFs (same as invoice generation)
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
