@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit, Send, Eye, Check, X, FileText, Download, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Check, X, FileText, Download, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { QuoteStatusBadge } from "../trades-ui/quote-status-badge";
 import { formatPhoneForWhatsApp } from "../../utils/phone-utils";
@@ -12,6 +12,7 @@ import { InvoiceA4Page } from "../ui/invoice-a4-page";
 import { TemplateRenderer } from "../ui/invoice-templates/template-renderer";
 import { useBranding } from "../../utils/branding-context";
 import { AttributionDisplay } from "../ui/attribution-display";
+import { Eye } from "lucide-react";
 
 interface QuoteDetailProps {
   quote: any;
@@ -259,7 +260,6 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
       }
     } catch (error) {
       console.error('Failed to send quote:', error);
-      toast.dismiss(loadingToast);
       toast.error('Failed to generate quote PDF');
     } finally {
       setLoading(false);
@@ -572,9 +572,9 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                   disabled={loading}
                   className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
                   style={{ 
-                    backgroundColor: '#16A34A',
+                    backgroundColor: '#0A84FF',
                     color: 'white',
-                    height: '48px',
+                    height: '56px',
                     borderRadius: '12px'
                   }}
                 >
@@ -582,84 +582,64 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                   <span className="trades-body">Send Quote</span>
                 </button>
                 
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => onNavigate('quote-builder', quoteData)}
-                    className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 transition-colors"
-                    style={{ height: '44px', borderRadius: '12px', color: '#111827' }}
-                  >
-                    <Edit size={16} />
-                    <span className="trades-caption">Edit</span>
-                  </button>
-                  
-                  <button
-                    onClick={async () => {
-                      try {
-                        // Try template-based generation first
-                        await downloadQuotePDFWithTemplate(
-                          {
-                            id: quoteData.id,
-                            number: quoteData.number || 'QUO-2024-0001',
-                            title: quoteData.title || 'Quote',
-                            createdAt: quoteData.createdAt,
-                            validUntil: quoteData.validUntil,
-                            lineItems: quoteData.lineItems || [],
-                            subtotal: subtotal,
-                            vatAmount: vatAmount,
-                            total: total,
-                            notes: quoteData.notes,
-                            status: quoteData.status
-                          },
-                          {
-                            name: clientData?.name || 'Client',
-                            phone: clientData?.phone,
-                            address: clientData?.address
-                          }
-                        );
-                        toast.success('Quote opened in new window - Press Ctrl+P to save as PDF!');
-                      } catch (templateError) {
-                        console.warn('Template-based generation failed, falling back to legacy:', templateError);
-                        
-                        // Fallback to legacy generation
-                        await downloadQuotePDF(
-                          {
-                            id: quoteData.id,
-                            number: quoteData.number || 'QUO-2024-0001',
-                            title: quoteData.title || 'Quote',
-                            createdAt: quoteData.createdAt,
-                            validUntil: quoteData.validUntil,
-                            lineItems: quoteData.lineItems || [],
-                            subtotal: subtotal,
-                            vatAmount: vatAmount,
-                            total: total,
-                            notes: quoteData.notes,
-                            status: quoteData.status
-                          },
-                          {
-                            name: clientData?.name || 'Client',
-                            phone: clientData?.phone,
-                            address: clientData?.address
-                          }
-                        );
-                        toast.success('Quote PDF downloaded! WhatsApp opened with pre-filled message.');
-                      }
-                    }}
-                    className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 transition-colors"
-                    style={{ height: '44px', borderRadius: '12px', color: '#111827' }}
-                  >
-                    <Download size={16} />
-                    <span className="trades-caption">Download</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => onNavigate('quote-preview', quoteData)}
-                    className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 transition-colors"
-                    style={{ height: '44px', borderRadius: '12px', color: '#111827' }}
-                  >
-                    <Eye size={16} />
-                    <span className="trades-caption">Preview</span>
-                  </button>
-                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      // Try template-based generation first
+                      await downloadQuotePDFWithTemplate(
+                        {
+                          id: quoteData.id,
+                          number: quoteData.number || 'QUO-2024-0001',
+                          title: quoteData.title || 'Quote',
+                          createdAt: quoteData.createdAt,
+                          validUntil: quoteData.validUntil,
+                          lineItems: quoteData.lineItems || [],
+                          subtotal: subtotal,
+                          vatAmount: vatAmount,
+                          total: total,
+                          notes: quoteData.notes,
+                          status: quoteData.status
+                        },
+                        {
+                          name: clientData?.name || 'Client',
+                          phone: clientData?.phone,
+                          address: clientData?.address
+                        }
+                      );
+                      toast.success('Quote opened in new window - Press Ctrl+P to save as PDF!');
+                    } catch (templateError) {
+                      console.warn('Template-based generation failed, falling back to legacy:', templateError);
+                      
+                      // Fallback to legacy generation
+                      await downloadQuotePDF(
+                        {
+                          id: quoteData.id,
+                          number: quoteData.number || 'QUO-2024-0001',
+                          title: quoteData.title || 'Quote',
+                          createdAt: quoteData.createdAt,
+                          validUntil: quoteData.validUntil,
+                          lineItems: quoteData.lineItems || [],
+                          subtotal: subtotal,
+                          vatAmount: vatAmount,
+                          total: total,
+                          notes: quoteData.notes,
+                          status: quoteData.status
+                        },
+                        {
+                          name: clientData?.name || 'Client',
+                          phone: clientData?.phone,
+                          address: clientData?.address
+                        }
+                      );
+                      toast.success('Quote PDF downloaded! WhatsApp opened with pre-filled message.');
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors bg-white border"
+                  style={{ height: '56px', borderRadius: '12px', color: '#111827', borderColor: '#E5E7EB' }}
+                >
+                  <Download size={20} />
+                  <span className="trades-body">Download PDF</span>
+                </button>
               </>
             )}
 
@@ -673,7 +653,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                     style={{ 
                       backgroundColor: '#16A34A',
                       color: 'white',
-                      height: '48px',
+                      height: '56px',
                       borderRadius: '12px'
                     }}
                   >
@@ -688,7 +668,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                     style={{ 
                       backgroundColor: '#DC2626',
                       color: 'white',
-                      height: '48px',
+                      height: '56px',
                       borderRadius: '12px'
                     }}
                   >
@@ -697,15 +677,15 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleSendQuote}
                     disabled={loading}
                     className="flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 transition-colors disabled:opacity-50"
-                    style={{ height: '44px', borderRadius: '12px', color: '#0A84FF' }}
+                    style={{ height: '56px', borderRadius: '12px', color: '#0A84FF' }}
                   >
-                    <Send size={16} />
-                    <span className="trades-caption">Resend</span>
+                    <Send size={20} />
+                    <span className="trades-body">Resend</span>
                   </button>
 
                   <button
@@ -760,20 +740,11 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                         toast.success('Quote PDF downloaded! WhatsApp opened with pre-filled message.');
                       }
                     }}
-                    className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 transition-colors"
-                    style={{ height: '44px', borderRadius: '12px', color: '#111827' }}
+                    className="flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors bg-white border"
+                    style={{ height: '56px', borderRadius: '12px', color: '#111827', borderColor: '#E5E7EB' }}
                   >
-                    <Download size={16} />
-                    <span className="trades-caption">Download</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => onNavigate('quote-preview', quoteData)}
-                    className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 transition-colors"
-                    style={{ height: '44px', borderRadius: '12px', color: '#111827' }}
-                  >
-                    <Eye size={16} />
-                    <span className="trades-caption">Preview</span>
+                    <Download size={20} />
+                    <span className="trades-body">Download</span>
                   </button>
                 </div>
               </>
@@ -787,7 +758,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                 style={{ 
                   backgroundColor: '#0A84FF',
                   color: 'white',
-                  height: '48px',
+                  height: '56px',
                   borderRadius: '12px'
                 }}
               >
@@ -818,7 +789,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                   style={{ 
                     backgroundColor: '#0A84FF',
                     color: 'white',
-                    height: '48px',
+                    height: '56px',
                     borderRadius: '12px'
                   }}
                 >
@@ -845,7 +816,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
                 style={{ 
                   backgroundColor: '#DC2626',
                   color: 'white',
-                  height: '48px',
+                  height: '56px',
                   borderRadius: '12px'
                 }}
               >

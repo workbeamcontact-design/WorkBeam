@@ -393,7 +393,7 @@ export function DashboardClean({ onNavigate, refreshKey = 0 }: DashboardProps) {
     <LoadingWrapper isLoading={loading} type="dashboard">
       <div className="flex-1 overflow-hidden flex flex-col">
         {/* Clean Header */}
-        <div className="header bg-white p-4 border-b border-gray-200">
+        <div className="header bg-white p-4 pb-3">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="trades-h1 mb-1" style={{ color: 'var(--ink)' }}>Dashboard</h1>
@@ -412,10 +412,13 @@ export function DashboardClean({ onNavigate, refreshKey = 0 }: DashboardProps) {
             <Bell size={16} />
           </Button>
         </div>
+      </div>
 
+      <div className="flex-1 overflow-y-auto p-4 pt-2 space-y-6 pb-24">
+        
         {/* Financial Summary - Clean and prominent */}
         {metrics.totalOutstanding > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm -mt-2 sticky top-0 z-10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="trades-caption text-blue-700 mb-1">Outstanding Revenue</p>
@@ -439,9 +442,7 @@ export function DashboardClean({ onNavigate, refreshKey = 0 }: DashboardProps) {
             </div>
           </div>
         )}
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
+        
         
         {/* Priority Alerts - Only when needed */}
         {priorityAlerts.length > 0 && (
