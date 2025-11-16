@@ -337,7 +337,7 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
       if (savedQuote) {
         autosave.clearDraft();
         toast.success("Quote saved!");
-        onNavigate("quote-preview", savedQuote);
+        onNavigate("quote-detail", savedQuote);
       } else {
         toast.error("Failed to save quote for preview");
       }

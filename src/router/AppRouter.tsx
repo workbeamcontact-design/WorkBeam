@@ -14,7 +14,6 @@ const ClientDetail = React.lazy(() => import('../components/screens/client-detai
 const JobDetail = React.lazy(() => import('../components/screens/job-detail').then(m => ({ default: m.JobDetail })));
 const QuoteBuilder = React.lazy(() => import('../components/screens/quote-builder').then(m => ({ default: m.QuoteBuilder })));
 const QuoteDetail = React.lazy(() => import('../components/screens/quote-detail').then(m => ({ default: m.QuoteDetail })));
-const QuotePreview = React.lazy(() => import('../components/screens/quote-preview').then(m => ({ default: m.QuotePreview })));
 const QuoteList = React.lazy(() => import('../components/screens/quote-list').then(m => ({ default: m.QuoteList })));
 const VariationBuilder = React.lazy(() => import('../components/screens/variation-builder').then(m => ({ default: m.VariationBuilder })));
 const PaymentRecorder = React.lazy(() => import('../components/screens/payment-recorder').then(m => ({ default: m.PaymentRecorder })));
@@ -187,11 +186,6 @@ export const AppRouter: React.FC = memo(() => {
       case 'quote-detail':
         return renderWithErrorBoundary(
           <QuoteDetail quote={data} onNavigate={handleNavigate} onBack={handleBack} />
-        );
-        
-      case 'quote-preview':
-        return renderWithErrorBoundary(
-          <QuotePreview quote={data} onNavigate={handleNavigate} onBack={handleBack} />
         );
         
       case 'variation-builder':

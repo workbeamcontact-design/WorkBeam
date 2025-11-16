@@ -15,7 +15,6 @@ export type Screen =
   | 'job-list'
   | 'quote-builder'
   | 'quote-detail'
-  | 'quote-preview'
   | 'variation-builder'
   | 'quote-approval' 
   | 'variation-approval'
@@ -100,7 +99,7 @@ export class NavigationService {
     }
 
     // Quote-related screens validation
-    const quoteScreens = ['quote-builder', 'quote-detail', 'quote-preview'];
+    const quoteScreens = ['quote-builder', 'quote-detail'];
     if (quoteScreens.includes(screen)) {
       return this.validateQuoteNavigation(screen, data);
     }

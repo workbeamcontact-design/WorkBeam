@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 export type Screen = 
   | 'dashboard' | 'clients' | 'calendar' | 'settings'
-  | 'client-detail' | 'job-detail' | 'quote-builder' | 'quote-detail' | 'quote-preview' | 'quote-list'
+  | 'client-detail' | 'job-detail' | 'quote-builder' | 'quote-detail' | 'quote-list'
   | 'variation-builder' | 'quote-approval' | 'variation-approval'
   | 'payment-recorder' | 'add-booking' | 'job-list' | 'new-client' | 'edit-client'
   | 'new-job' | 'booking-detail' | 'generate-invoice' | 'invoice-detail' | 'invoice-list'
@@ -86,7 +86,7 @@ export const useAppStore = create<AppState>()(
 
         // Validate data for screens that require it
         const screensRequiringData = [
-          'client-detail', 'job-detail', 'quote-detail', 'quote-preview',
+          'client-detail', 'job-detail', 'quote-detail',
           'invoice-detail', 'record-payment', 'edit-client', 'booking-detail'
         ];
 
@@ -178,8 +178,6 @@ export const useAppStore = create<AppState>()(
               case 'generate-invoice':
               case 'payment-recorder':
                 return data.job || data; // These receive job data
-              case 'quote-preview':
-                return data.quote || data; // Quote preview receives quote data
               case 'record-payment':
                 return data.invoice || data; // Record payment receives invoice data
               default:
@@ -208,7 +206,6 @@ export const useAppStore = create<AppState>()(
             // Quote-related screens
             'quote-builder': 'job-detail',
             'quote-detail': 'job-detail',
-            'quote-preview': 'quote-detail',
             'variation-builder': 'job-detail',
             
             // Invoice-related screens
