@@ -22,6 +22,7 @@ import { api } from "../../utils/api";
 import { toast } from "sonner@2.0.3";
 import { useAuth } from "../../utils/auth-context";
 import { AttributionDisplay } from "../ui/attribution-display";
+import { useAppStore } from "../../hooks/useAppStore";
 
 interface JobDetailProps {
   job: any;
@@ -42,7 +43,7 @@ export function JobDetail({ job, onNavigate, onBack }: JobDetailProps) {
   const [currentJob, setCurrentJob] = useState<any>(job); // Track the freshly loaded job data
 
   // Watch for refresh trigger from app store
-  const { jobDetailRefreshKey } = require('../../hooks/useAppStore').useAppStore();
+  const { jobDetailRefreshKey } = useAppStore();
 
   // Load job data when user logs in, job changes, or refresh is triggered
   useEffect(() => {

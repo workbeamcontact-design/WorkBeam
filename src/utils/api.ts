@@ -1,6 +1,7 @@
 import { projectId, publicAnonKey } from './supabase/info';
 import { localApi } from './local-storage-api';
 import { supabase } from './supabase/client';
+import { removeUserData } from './user-scoped-storage';
 
 const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-20084ff3`;
 
@@ -1392,7 +1393,6 @@ class ApiClient {
    */
   private clearLocalCacheForType(type: 'jobs' | 'clients' | 'quotes' | 'invoices' | 'bookings' | 'payments') {
     try {
-      const { removeUserData } = require('./user-scoped-storage');
       removeUserData(type);
       console.log(`🧹 Cleared local cache for: ${type}`);
     } catch (error) {
@@ -1406,7 +1406,6 @@ class ApiClient {
    */
   private clearAllLocalCache() {
     try {
-      const { removeUserData } = require('./user-scoped-storage');
       removeUserData('jobs');
       removeUserData('clients');
       removeUserData('quotes');
