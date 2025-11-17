@@ -207,7 +207,8 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
           api.getBankDetails()
         ]);
         setBusinessData(business);
-        setBankDetails(bank);
+        // Only set bank details if show_on_invoice is enabled
+        setBankDetails(bank?.show_on_invoice ? bank : null);
 
         // Generate proper sequential invoice number using unified naming system
         try {

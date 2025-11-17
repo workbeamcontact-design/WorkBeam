@@ -591,8 +591,8 @@ class PDFGenerator {
     this.currentY += 20;
 
     this.setFont(12);
-    if (bankDetails && (bankDetails.account_holder_name || bankDetails.bank_name || bankDetails.sort_code || bankDetails.account_number)) {
-      // Use actual bank details
+    if (bankDetails && bankDetails.show_on_invoice !== false && (bankDetails.account_holder_name || bankDetails.bank_name || bankDetails.sort_code || bankDetails.account_number)) {
+      // Use actual bank details (only if show_on_invoice is enabled)
       if (bankDetails.account_holder_name) {
         this.drawText(`Account Name: ${bankDetails.account_holder_name}`, this.margin, this.currentY);
         this.currentY += 18;

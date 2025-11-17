@@ -12,6 +12,7 @@ import { api } from "../../utils/api";
 import { ApiStatus } from "../ui/api-status";
 import { LoadingWrapper, DashboardSkeleton } from "../ui/loading-states";
 import { useAuth } from "../../utils/auth-context";
+import { WorkBeamLogo } from "../ui/workbeam-logo";
 
 interface DashboardProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -355,32 +356,32 @@ export function DashboardClean({ onNavigate, refreshKey = 0 }: DashboardProps) {
 
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center max-w-sm">
-            <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Building2 size={36} className="text-blue-600" />
+            <div className="flex justify-center mb-6">
+              <WorkBeamLogo variant="light" width={140} />
             </div>
             <h2 className="trades-h2 mb-3" style={{ color: 'var(--ink)' }}>
               Ready to Grow Your Trade Business?
             </h2>
-            <p className="trades-body mb-8" style={{ color: 'var(--muted)' }}>
-              Start by adding your first client and begin managing jobs, quotes, and invoices professionally
+            <p className="trades-body mb-8" style={{ color: 'var(--muted)', lineHeight: '1.6' }}>
+              Please head over and set up your business profile so we have all the correct information. This includes branding & logo, business details, bank details, and invoice template.
             </p>
             
             <div className="space-y-4">
               <Button 
-                onClick={() => onNavigate('new-client')}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white gap-3"
-              >
-                <Plus size={20} />
-                Add Your First Client
-              </Button>
-              
-              <Button 
                 onClick={() => onNavigate('business-details')}
-                variant="outline"
-                className="w-full h-12 gap-3"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white gap-3"
               >
                 <Star size={20} />
                 Setup Business Profile
+              </Button>
+              
+              <Button 
+                onClick={() => onNavigate('new-client')}
+                variant="outline"
+                className="w-full h-12 gap-3"
+              >
+                <Plus size={20} />
+                Add Your First Client
               </Button>
             </div>
           </div>

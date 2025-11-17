@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import { CountryCodeSelect } from '../ui/country-code-select';
 import { useAutosave, AutosaveStatus } from '../../hooks/useAutosave';
 import { bookingSchema, validate, formatValidationErrors } from '../../utils/validation.tsx';
 import { sanitizeText } from '../../utils/sanitization';
@@ -26,6 +27,7 @@ interface AddBookingProps {
     selectedClientId?: string | number;
     newClient?: {
       name: string;
+      countryCode?: string;
       phone: string;
       address: string;
     };
@@ -56,6 +58,7 @@ interface BookingFormData {
   selectedClientId?: string | number;
   newClient?: {
     name: string;
+    countryCode: string;
     phone: string;
     address: string;
   };
@@ -301,10 +304,15 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
     const isNewLead = formData.clientType === 'new';
     const bookingTypeTitle = formData.bookingType?.charAt(0).toUpperCase() + formData.bookingType?.slice(1) || '';
     
+    // Format phone number with country code for new leads
+    const newLeadPhone = formData.newClient?.phone 
+      ? `${formData.newClient.countryCode || '+44'}${formData.newClient.phone.trim().replace(/^0/, '')}`
+      : '';
+    
     const bookingData = {
       clientId: clientId?.toString(),
       clientName: isExistingClient ? selectedClient.name : formData.newClient?.name || 'New Lead',
-      clientPhone: isExistingClient ? selectedClient.phone : formData.newClient?.phone || '',
+      clientPhone: isExistingClient ? selectedClient.phone : newLeadPhone,
       title: isExistingClient 
         ? `${bookingTypeTitle} - ${selectedClient.name}`
         : `${bookingTypeTitle} - ${formData.newClient?.name || 'New Lead'}`,
@@ -407,8 +415,11 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
 
   const renderStep1 = () => (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto scroll_area">
-        <div className="p-4 pb-32">
+      <div className="flex-1 overflow-y-auto scroll_area" style={{ 
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch'
+      }}>
+        <div className="p-4" style={{ paddingBottom: '240px' }}>
           {/* Hero Section */}
           <div className="text-center mb-8 pt-4">
             <h2 className="trades-h1 mb-2" style={{ color: 'var(--ink)' }}>
@@ -519,6 +530,7 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
                         clientType: 'new',
                         newClient: { 
                           name: searchTerm,
+                          countryCode: '+44',
                           phone: '',
                           address: ''
                         } 
@@ -540,7 +552,16 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
               {/* Create New Lead Button */}
               <button
                 className="w-full p-5 rounded-xl border-2 border-dashed border-border hover:border-blue-600 hover:bg-blue-50 transition-all text-left group"
-                onClick={() => setFormData(prev => ({ ...prev, clientType: 'new' }))}
+                onClick={() => setFormData(prev => ({ 
+                  ...prev, 
+                  clientType: 'new',
+                  newClient: {
+                    name: '',
+                    countryCode: '+44',
+                    phone: '',
+                    address: ''
+                  }
+                }))}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-blue-100 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
@@ -595,10 +616,24 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
                 
                 <div>
                   <Label className="trades-label text-ink mb-2 block">
+                    Country <span className="text-red-500">*</span>
+                  </Label>
+                  <CountryCodeSelect
+                    value={formData.newClient?.countryCode || '+44'}
+                    onValueChange={(value) => setFormData(prev => ({
+                      ...prev,
+                      newClient: { ...prev.newClient, countryCode: value } as any
+                    }))}
+                    className="h-12"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="trades-label text-ink mb-2 block">
                     Phone <span className="text-red-500">*</span>
                   </Label>
                   <Input
-                    placeholder="Phone number"
+                    placeholder={(formData.newClient?.countryCode || '+44') === '+44' ? "07123 456 789" : "Enter phone number"}
                     type="tel"
                     value={formData.newClient?.phone || ''}
                     onChange={(e) => setFormData(prev => ({
@@ -607,6 +642,9 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
                     }))}
                     className="h-12"
                   />
+                  <p className="trades-caption text-muted mt-2">
+                    Mobile preferred; WhatsApp used for messages.
+                  </p>
                 </div>
                 
                 <div>
@@ -630,15 +668,15 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
         </div>
       </div>
 
-      {/* Fixed Bottom Button */}
-      <div className="absolute bottom-20 left-0 right-0 px-4">
+      {/* Floating Action Button */}
+      <div className="absolute bottom-20 left-0 right-0 px-4 bg-surface-alt z-10">
         <button
           onClick={handleStep1Continue}
           disabled={!formData.clientType || 
             (formData.clientType === 'existing' && !formData.selectedClientId) ||
             (formData.clientType === 'new' && (!formData.newClient?.name?.trim() || !formData.newClient?.phone?.trim()))
           }
-          className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
           style={{
             backgroundColor: '#0A84FF',
             color: 'white',
@@ -655,8 +693,11 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
 
   const renderStep2 = () => (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto scroll_area">
-        <div className="space-y-6 p-4 pb-52">
+      <div className="flex-1 overflow-y-auto scroll_area" style={{ 
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch'
+      }}>
+        <div className="space-y-6 p-4" style={{ paddingBottom: '240px' }}>
           {/* Header */}
           <div className="text-center mb-6">
             <h3 className="trades-h2 mb-2" style={{ color: 'var(--ink)' }}>
@@ -868,14 +909,14 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="absolute bottom-20 left-0 right-0 px-4">
+      {/* Floating Action Buttons */}
+      <div className="absolute bottom-20 left-0 right-0 px-4 bg-surface-alt z-10">
         <div className="flex gap-3">
           {!initialData?.startAtStep2 && (
             <button
               onClick={() => initialData?.startAtStep2 ? onBack() : setStep(1)}
               disabled={creatingBooking}
-              className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
               style={{
                 backgroundColor: '#F9FAFB',
                 color: '#111827',
@@ -891,7 +932,7 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
           <button
             onClick={handleCreateBooking}
             disabled={creatingBooking || !formData.bookingType}
-            className={`flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 ${!initialData?.startAtStep2 ? 'flex-1' : 'w-full'}`}
+            className={`flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl ${!initialData?.startAtStep2 ? 'flex-1' : 'w-full'}`}
             style={{
               backgroundColor: '#0A84FF',
               color: 'white',

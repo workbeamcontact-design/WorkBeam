@@ -117,6 +117,8 @@ export const generateBookingConfirmationMessage = (booking: BookingData, busines
 
 /**
  * Opens WhatsApp with a pre-filled message
+ * Uses api.whatsapp.com format for better reliability across platforms
+ * and when no previous chat history exists
  */
 export const openWhatsApp = (phone: string, message: string): void => {
   if (!phone) {
@@ -124,9 +126,15 @@ export const openWhatsApp = (phone: string, message: string): void => {
     return;
   }
   
-  const cleanPhone = phone.replace(/\s/g, '');
+  // Remove all non-numeric characters except the leading +
+  const cleanPhone = phone.replace(/[^\d+]/g, '');
+  
+  // URL encode the message properly
   const encodedMessage = encodeURIComponent(message);
-  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+  
+  // Use api.whatsapp.com instead of wa.me for better pre-fill reliability
+  // This format works more consistently when there's no previous chat history
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
   
   window.open(whatsappUrl, '_blank');
 };

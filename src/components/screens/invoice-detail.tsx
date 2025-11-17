@@ -135,7 +135,8 @@ export function InvoiceDetail({ invoice, onNavigate, onBack }: InvoiceDetailProp
           api.getInvoicePayments(invoice.id)
         ]);
         setBusinessData(business);
-        setBankDetails(bank);
+        // Only set bank details if show_on_invoice is enabled
+        setBankDetails(bank?.show_on_invoice ? bank : null);
         setPayments(invoicePayments || []);
         
         console.log('💰 Loaded invoice payments:', {
