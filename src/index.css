@@ -913,6 +913,10 @@
     z-index: 50;
   }
 
+  .z-\[100\] {
+    z-index: 100;
+  }
+
   .col-span-2 {
     grid-column: span 2 / span 2;
   }
@@ -1489,6 +1493,10 @@
 
   .w-full {
     width: 100%;
+  }
+
+  .w-px {
+    width: 1px;
   }
 
   .max-w-\[80px\] {

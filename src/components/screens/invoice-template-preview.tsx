@@ -215,10 +215,14 @@ export function InvoiceTemplatePreview({ onNavigate, onBack, template }: Navigat
       </div>
 
       {/* Content Area with proper spacing */}
-      <div className="flex-1 flex flex-col">
-        {/* Scrollable Preview Area */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 pb-24">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Scrollable Preview Area with space for button + bottom nav */}
+        <div className="flex-1 overflow-y-auto" style={{ 
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain',
+          paddingBottom: '156px' // Button (56px + 16px padding) + Bottom Nav (68px) + extra spacing
+        }}>
+          <div className="p-4">
             <InvoicePreviewCard
               onViewFullSize={() => setShowFullSizeViewer(true)}
             >
@@ -247,22 +251,29 @@ export function InvoiceTemplatePreview({ onNavigate, onBack, template }: Navigat
           </div>
         </div>
 
-        {/* Fixed Bottom Button with proper spacing above bottom nav */}
-        <div className="p-4 bg-white border-t border-gray-200 pb-24">
+        {/* Floating Action Button - positioned above bottom nav */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 z-10" style={{ paddingBottom: '84px' }}>
           <button
             onClick={handleUseTemplate}
             disabled={isSaving}
-            className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
+            style={{
+              backgroundColor: '#0A84FF',
+              color: 'white',
+              height: '56px',
+              borderRadius: '12px',
+              minHeight: '44px'
+            }}
           >
             {isSaving ? (
               <>
-                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                Saving...
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span className="trades-body">Saving...</span>
               </>
             ) : (
               <>
-                <Check className="w-4 h-4" />
-                Use This Template
+                <Check size={20} />
+                <span className="trades-body">Use This Template</span>
               </>
             )}
           </button>
@@ -277,10 +288,6 @@ export function InvoiceTemplatePreview({ onNavigate, onBack, template }: Navigat
         onExport={() => {
           // Future: Implement PDF export
           toast.success('PDF export coming soon');
-        }}
-        onShare={() => {
-          // Future: Implement sharing
-          toast.success('Sharing coming soon');
         }}
       >
         <InvoiceA4Page>

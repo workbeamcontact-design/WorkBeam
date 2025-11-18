@@ -1072,7 +1072,6 @@ ${businessName}`;
         onClose={() => setShowFullSizeViewer(false)}
         title={`Invoice ${invoice.number || 'Draft'}`}
         onExport={handleDownloadPDF}
-        onShare={handleResend}
       >
         {templateData && (
           <div className="pdf-optimized">

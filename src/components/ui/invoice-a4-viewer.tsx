@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { X, Download, Share2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { X, Download, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize, FileText } from 'lucide-react';
 import { ZoomPanLayer, ZoomPanAPI } from './zoom-pan-layer';
 import { InvoiceA4Page } from './invoice-a4-page';
 
@@ -9,7 +9,6 @@ interface InvoiceA4ViewerProps {
   children: React.ReactNode | React.ReactNode[];
   title?: string;
   onExport?: () => void;
-  onShare?: () => void;
 }
 
 /**
@@ -21,14 +20,14 @@ interface InvoiceA4ViewerProps {
  * - Controls off the page (no overlay on content)
  * - Multi-page support with pagination
  * - Fixed top app bar and bottom controls
+ * - Improved drag functionality with accurate panning
  */
 export function InvoiceA4Viewer({ 
   isOpen, 
   onClose, 
   children, 
   title = 'Invoice Preview',
-  onExport,
-  onShare 
+  onExport
 }: InvoiceA4ViewerProps) {
   const [currentZoom, setCurrentZoom] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
@@ -126,7 +125,7 @@ export function InvoiceA4Viewer({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gray-900" style={{ backgroundColor: '#0B0F14' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-gray-900" style={{ backgroundColor: '#0B0F14' }}>
       {/* Top App Bar - Fixed, never overlays page */}
       <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center gap-4">
@@ -138,37 +137,13 @@ export function InvoiceA4Viewer({
           )}
         </div>
         
-        <div className="flex items-center gap-2">
-          {/* Share Button */}
-          {onShare && (
-            <button
-              onClick={onShare}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors trades-caption min-h-11"
-            >
-              <Share2 className="w-4 h-4" />
-              Share
-            </button>
-          )}
-          
-          {/* Export PDF Button */}
-          {onExport && (
-            <button
-              onClick={onExport}
-              className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors trades-caption font-medium min-h-11"
-            >
-              <Download className="w-4 h-4" />
-              Export PDF
-            </button>
-          )}
-          
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="flex items-center justify-center w-11 h-11 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="flex items-center justify-center w-11 h-11 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Stage Area - Fills remaining space, contains A4Stage */}
@@ -220,6 +195,23 @@ export function InvoiceA4Viewer({
         <div className="flex items-center justify-center gap-4">
           {/* Zoom Controls */}
           <div className="flex items-center gap-2 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
+            {/* Download PDF Button - Far Left */}
+            {onExport && (
+              <>
+                <button
+                  onClick={onExport}
+                  className="flex items-center justify-center w-11 h-11 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  aria-label="Download PDF"
+                  title="Download PDF"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+                
+                {/* Divider */}
+                <div className="w-px h-6 bg-gray-300" />
+              </>
+            )}
+
             {/* Fit to Page Button */}
             <button
               onClick={handleFitToPage}

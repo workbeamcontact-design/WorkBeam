@@ -20,6 +20,13 @@ interface Position {
   y: number;
 }
 
+interface DragState {
+  startMouseX: number;
+  startMouseY: number;
+  startPosX: number;
+  startPosY: number;
+}
+
 interface Bounds {
   minX: number;
   maxX: number;
@@ -49,7 +56,7 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
+  const [dragState, setDragState] = useState<DragState>({ startMouseX: 0, startMouseY: 0, startPosX: 0, startPosY: 0 });
   const [lastTap, setLastTap] = useState(0);
   const [fitZoom, setFitZoom] = useState(1);
 
@@ -83,7 +90,8 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
     onZoomChange?.(newFitZoom);
   }, [calculateFitZoom, onZoomChange]);
 
-  // Calculate bounds to prevent content from going off-screen
+  // Calculate bounds to prevent content from going completely off-screen
+  // When zoomed in, allow generous panning - keep at least some content visible
   const calculateBounds = useCallback((currentZoom: number): Bounds => {
     if (!containerRef.current || !contentRef.current) {
       return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
@@ -97,8 +105,18 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
     const scaledContentWidth = content.scrollWidth * currentZoom;
     const scaledContentHeight = content.scrollHeight * currentZoom;
 
-    const maxX = Math.max(0, (scaledContentWidth - containerWidth) / 2);
-    const maxY = Math.max(0, (scaledContentHeight - containerHeight) / 2);
+    // When content is smaller than container, don't allow panning
+    if (scaledContentWidth <= containerWidth && scaledContentHeight <= containerHeight) {
+      return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    }
+
+    // Allow very generous panning when zoomed in
+    // User can pan until only a small portion (10%) of content remains visible
+    // This allows viewing edges comfortably by bringing them near the center
+    const minVisiblePortion = 0.1; // Keep at least 10% of content visible
+    
+    const maxX = (scaledContentWidth / 2) + (containerWidth / 2) - (scaledContentWidth * minVisiblePortion);
+    const maxY = (scaledContentHeight / 2) + (containerHeight / 2) - (scaledContentHeight * minVisiblePortion);
 
     return {
       minX: -maxX,
@@ -157,17 +175,17 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (zoom <= fitZoom) return; // Only allow panning when zoomed in
     setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    setDragState({ startMouseX: e.clientX, startMouseY: e.clientY, startPosX: position.x, startPosY: position.y });
   }, [zoom, fitZoom, position]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging) return;
     const newPosition = {
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
+      x: dragState.startPosX + e.clientX - dragState.startMouseX,
+      y: dragState.startPosY + e.clientY - dragState.startMouseY
     };
     setPosition(constrainPosition(newPosition, zoom));
-  }, [isDragging, dragStart, zoom, constrainPosition]);
+  }, [isDragging, dragState, zoom, constrainPosition]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -197,7 +215,7 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
 
       if (zoom > fitZoom) {
         setIsDragging(true);
-        setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y });
+        setDragState({ startMouseX: touch.clientX, startMouseY: touch.clientY, startPosX: position.x, startPosY: position.y });
       }
     }
   }, [zoom, fitZoom, position, lastTap, fitToPage, handleZoomChange]);
@@ -207,13 +225,13 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
       e.preventDefault();
       const touch = e.touches[0];
       const newPosition = {
-        x: touch.clientX - dragStart.x,
-        y: touch.clientY - dragStart.y
+        x: dragState.startPosX + touch.clientX - dragState.startMouseX,
+        y: dragState.startPosY + touch.clientY - dragState.startMouseY
       };
       setPosition(constrainPosition(newPosition, zoom));
     }
     // TODO: Add pinch zoom for two-finger gestures
-  }, [isDragging, dragStart, zoom, constrainPosition]);
+  }, [isDragging, dragState, zoom, constrainPosition]);
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
@@ -275,7 +293,7 @@ export const ZoomPanLayer = React.forwardRef<ZoomPanAPI, ZoomPanLayerProps>(({
       onTouchEnd={handleTouchEnd}
       style={{ 
         cursor: isDragging ? 'grabbing' : (zoom > fitZoom ? 'grab' : 'default'),
-        touchAction: 'none' // Prevent default touch behaviors
+        touchAction: zoom > fitZoom ? 'none' : 'auto' // Only prevent touch when zoomed in
       }}
     >
       <div
