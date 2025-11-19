@@ -12,6 +12,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       richColors={false}
       visibleToasts={3}
       duration={4000}
+      swipeable={true}
+      dismissible={true}
       style={
         {
           "--normal-bg": "var(--popover)",
@@ -30,6 +32,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           description: 'group-[.toast]:text-muted-foreground',
           actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
           cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+          closeButton: 'group-[.toast]:bg-white group-[.toast]:text-gray-900 group-[.toast]:border-gray-200',
         },
         // Add aria attributes to handle accessibility warnings
         ariaProps: {

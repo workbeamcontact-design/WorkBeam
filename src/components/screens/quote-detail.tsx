@@ -173,7 +173,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
             );
             
             toast.dismiss(loadingToast);
-            toast.success('Quote downloaded');
+            toast.success('Quote downloaded, redirecting to WhatsApp');
           } catch (templateError) {
             console.warn('Template-based generation failed, falling back to legacy:', templateError);
             

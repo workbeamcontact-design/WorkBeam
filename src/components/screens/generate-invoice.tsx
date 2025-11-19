@@ -76,6 +76,7 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
   const [hasDepositInvoice, setHasDepositInvoice] = useState<boolean>(false);
   const [hasFullInvoice, setHasFullInvoice] = useState<boolean>(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
+  const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
   
   // CRITICAL: Validate job data on mount - only log once
   useEffect(() => {
@@ -1981,26 +1982,117 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
             </div>
 
             {/* Summary */}
-            <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div className="p-4 rounded-xl mb-6" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}>
               <h3 className="trades-label mb-3" style={{ color: 'var(--ink)' }}>Invoice Summary</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="trades-body" style={{ color: 'var(--ink)' }}>Subtotal</span>
-                  <span className="trades-body" style={{ color: 'var(--ink)' }}>{formatCurrency(totals.subtotal)}</span>
-                </div>
-                
-                {invoiceData.vatEnabled && (
-                  <div className="flex justify-between">
-                    <span className="trades-body" style={{ color: 'var(--muted)' }}>VAT ({invoiceData.vatRate}%)</span>
-                    <span className="trades-body" style={{ color: 'var(--muted)' }}>{formatCurrency(totals.vatAmount)}</span>
+              
+              {/* Collapsed View - Amount Due */}
+              {!showBreakdown && (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="trades-h2" style={{ color: 'var(--ink)' }}>Amount Due</span>
+                    <span className="trades-h2" style={{ color: 'var(--ink)' }}>{formatCurrency(totals.total)}</span>
                   </div>
-                )}
-                
-                <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-                  <span className="trades-h2" style={{ color: 'var(--ink)' }}>Total</span>
-                  <span className="trades-h2" style={{ color: 'var(--ink)' }}>{formatCurrency(totals.total)}</span>
+                  <button
+                    onClick={() => setShowBreakdown(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all hover:opacity-80 active:opacity-60"
+                    style={{ color: 'var(--primary)', backgroundColor: 'transparent' }}
+                  >
+                    <span className="trades-body">View Breakdown</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: 'transform 0.2s' }}>
+                      <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
-              </div>
+              )}
+              
+              {/* Expanded View - Full Breakdown */}
+              {showBreakdown && (
+                <div className="space-y-4">
+                  {/* Hide Breakdown Button */}
+                  <button
+                    onClick={() => setShowBreakdown(false)}
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all hover:opacity-80 active:opacity-60"
+                    style={{ color: 'var(--primary)', backgroundColor: 'transparent' }}
+                  >
+                    <span className="trades-body">Hide Breakdown</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transform: 'rotate(180deg)', transition: 'transform 0.2s' }}>
+                      <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  
+                  {/* Project Breakdown */}
+                  <div className="space-y-2 pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="trades-label" style={{ color: 'var(--ink)' }}>📊 Project Breakdown</span>
+                    </div>
+                    <div className="flex justify-between pl-4">
+                      <span className="trades-body" style={{ color: 'var(--muted)' }}>Subtotal</span>
+                      <span className="trades-body" style={{ color: 'var(--muted)' }}>{formatCurrency(job?.subtotal || originalQuote?.subtotal || getActualJobSubtotal())}</span>
+                    </div>
+                    {(job?.vatEnabled || originalQuote?.vatEnabled) && (
+                      <div className="flex justify-between pl-4">
+                        <span className="trades-body" style={{ color: 'var(--muted)' }}>VAT ({job?.vatRate || originalQuote?.vatRate || 20}%)</span>
+                        <span className="trades-body" style={{ color: 'var(--muted)' }}>{formatCurrency(job?.vatAmount || originalQuote?.vatAmount || ((job?.subtotal || originalQuote?.subtotal || getActualJobSubtotal()) * (job?.vatRate || originalQuote?.vatRate || 20) / 100))}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium pt-1">
+                      <span className="trades-body" style={{ color: 'var(--ink)' }}>Project Total</span>
+                      <span className="trades-body" style={{ color: 'var(--ink)' }}>{formatCurrency(getActualJobTotal())}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Previous Invoices (only show if > 0) */}
+                  {previousInvoicesTotal > 0 && (
+                    <div className="space-y-2 pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
+                      <div className="flex justify-between">
+                        <span className="trades-body" style={{ color: 'var(--muted)' }}>Previous Invoices</span>
+                        <span className="trades-body" style={{ color: 'var(--muted)' }}>-{formatCurrency(previousInvoicesTotal)}</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* This Invoice */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="trades-label" style={{ color: 'var(--ink)' }}>
+                        📄 This Invoice
+                        {invoiceData.billType === 'deposit' && invoiceData.depositType === 'percentage' && ` (${invoiceData.depositAmount}% Deposit)`}
+                        {invoiceData.billType === 'deposit' && invoiceData.depositType === 'fixed' && ` (Deposit)`}
+                        {invoiceData.billType === 'remaining' && ` (Remaining Balance)`}
+                        {invoiceData.billType === 'full' && ` (Full Payment)`}
+                      </span>
+                    </div>
+                    {invoiceData.billType === 'full' ? (
+                      <>
+                        <div className="flex justify-between pl-4">
+                          <span className="trades-body" style={{ color: 'var(--ink)' }}>Subtotal</span>
+                          <span className="trades-body" style={{ color: 'var(--ink)' }}>{formatCurrency(totals.subtotal)}</span>
+                        </div>
+                        {totals.vatAmount > 0 && (
+                          <div className="flex justify-between pl-4">
+                            <span className="trades-body" style={{ color: 'var(--ink)' }}>VAT ({job?.vatRate || originalQuote?.vatRate || 20}%)</span>
+                            <span className="trades-body" style={{ color: 'var(--ink)' }}>{formatCurrency(totals.vatAmount)}</span>
+                          </div>
+                        )}
+                      </>
+                    ) : null}
+                    <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                      <span className="trades-h2" style={{ color: 'var(--ink)' }}>Amount Due</span>
+                      <span className="trades-h2" style={{ color: 'var(--ink)' }}>{formatCurrency(totals.total)}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Remaining Balance (only show if not full invoice and there's remaining amount) */}
+                  {invoiceData.billType !== 'full' && (getActualJobTotal() - previousInvoicesTotal - totals.total) > 0 && (
+                    <div className="pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                      <div className="flex justify-between">
+                        <span className="trades-body" style={{ color: 'var(--muted)' }}>💰 Remaining Balance</span>
+                        <span className="trades-body" style={{ color: 'var(--muted)' }}>{formatCurrency(getActualJobTotal() - previousInvoicesTotal - totals.total)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

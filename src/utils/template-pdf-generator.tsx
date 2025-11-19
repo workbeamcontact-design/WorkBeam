@@ -543,6 +543,7 @@ export async function generateTemplatePDF(
 
 /**
  * Downloads a document PDF using the selected template
+ * NOTE: For invoices with WhatsApp, use downloadInvoiceWithTemplateAndOpenWhatsApp instead
  */
 export async function downloadTemplatePDF(
   templateId: string,
@@ -551,7 +552,7 @@ export async function downloadTemplatePDF(
   branding: any,
   bankDetails?: any
 ): Promise<void> {
-  const loadingToast = toast.loading(`Downloading ${documentType}...`);
+  const loadingToast = toast.loading(`Generating ${documentType}...`);
   
   try {
     // Generate the actual PDF blob using jsPDF (same as quote system)
@@ -601,7 +602,7 @@ export async function downloadTemplatePDF(
     console.log('📄 Downloaded PDF with filename:', fileName);
     
     toast.dismiss(loadingToast);
-    toast.success(`${documentType === 'invoice' ? 'Invoice' : 'Quote'} downloaded`);
+    toast.success(`${documentType === 'invoice' ? 'Invoice' : 'Quote'} downloaded, redirecting to WhatsApp`);
     
   } catch (error) {
     console.error('Failed to generate PDF:', error);
@@ -769,13 +770,12 @@ export async function generateQuoteWithTemplate(
 
 /**
  * Downloads a quote PDF using the selected invoice template
+ * NOTE: Toast messages are handled by the calling component
  */
 export async function downloadQuotePDFWithTemplate(
   quote: any,
   client: any
 ): Promise<void> {
-  const loadingToast = toast.loading('Downloading quote...');
-  
   try {
     const pdfBlob = await generateQuoteWithTemplate(quote, client);
     
@@ -806,13 +806,8 @@ export async function downloadQuotePDFWithTemplate(
     
     console.log('📄 Downloaded quote PDF with filename:', fileName);
     
-    toast.dismiss(loadingToast);
-    toast.success('Quote downloaded');
-    
   } catch (error) {
     console.error('Failed to download quote PDF:', error);
-    toast.dismiss(loadingToast);
-    toast.error('Failed to download quote');
     throw error;
   }
 }

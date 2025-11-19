@@ -15,6 +15,7 @@ import { formatPhoneForWhatsApp } from "../../utils/phone-utils";
 import { toast } from "sonner@2.0.3";
 import { WhatsAppIcon } from "../ui/whatsapp-icon";
 import { AttributionDisplay } from "../ui/attribution-display";
+import { AppBar } from "../trades-ui/app-bar";
 
 interface InvoiceDetailProps {
   invoice: any;
@@ -488,6 +489,9 @@ export function InvoiceDetail({ invoice, onNavigate, onBack }: InvoiceDetailProp
         return;
       }
       
+      // Show "Generating invoice..." toast
+      const loadingToast = toast.loading('Generating invoice...');
+      
       console.log('📤 Resending invoice with templateData:', {
         invoiceNumber: templateData.invoice_number,
         lineItems: templateData.line_items?.length,
@@ -515,6 +519,10 @@ export function InvoiceDetail({ invoice, onNavigate, onBack }: InvoiceDetailProp
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success('Invoice downloaded, redirecting to WhatsApp');
 
       // Open WhatsApp with pre-filled message
       let clientPhone = clientData?.phone;
@@ -550,74 +558,13 @@ export function InvoiceDetail({ invoice, onNavigate, onBack }: InvoiceDetailProp
       
       if (hasPayments && balanceDue > 0) {
         // Partial payment scenario
-        whatsappMessage = `Hi ${templateData.client.name.split(' ')[0]},
-
-I'm sending you an updated invoice reflecting your recent payment${payments.length > 1 ? 's' : ''}.
-
-*INVOICE DETAILS*
-Invoice Number: ${templateData.invoice_number}
-Issue Date: ${formatDate(templateData.issue_date)}
-
-*PAYMENT UPDATE*
-Original Amount: ${formatCurrency(templateData.total)}
-Total Paid: ${formatCurrency(totalPaid)}
-${payments.length === 1 ? `(${formatDate(payments[0].date)} - ${formatPaymentMethodForMessage(payments[0].method)})` : `(${payments.length} payments received)`}
-
-*BALANCE DUE*
-${formatCurrency(balanceDue)}
-
-*DUE DATE*
-${formatDate(templateData.due_date)}
-
-────────────────
-
-Thank you for your payment${payments.length > 1 ? 's' : ''}! Please see the attached invoice PDF for full details.
-
-${businessName}`;
+        whatsappMessage = `Hi ${templateData.client.name.split(' ')[0]},\\n\\nI'm sending you an updated invoice reflecting your recent payment${payments.length > 1 ? 's' : ''}.\\n\\n*INVOICE DETAILS*\\nInvoice Number: ${templateData.invoice_number}\\nIssue Date: ${formatDate(templateData.issue_date)}\\n\\n*PAYMENT UPDATE*\\nOriginal Amount: ${formatCurrency(templateData.total)}\\nTotal Paid: ${formatCurrency(totalPaid)}\\n${payments.length === 1 ? `(${formatDate(payments[0].date)} - ${formatPaymentMethodForMessage(payments[0].method)})` : `(${payments.length} payments received)`}\\n\\n*BALANCE DUE*\\n${formatCurrency(balanceDue)}\\n\\n*DUE DATE*\\n${formatDate(templateData.due_date)}\\n\\n────────────────\\n\\nThank you for your payment${payments.length > 1 ? 's' : ''}! Please see the attached invoice PDF for full details.\\n\\n${businessName}`;
       } else if (hasPayments && balanceDue <= 0) {
         // Fully paid scenario
-        whatsappMessage = `Hi ${templateData.client.name.split(' ')[0]},
-
-Thank you for your payment! Here's your final invoice showing payment received.
-
-*INVOICE DETAILS*
-Invoice Number: ${templateData.invoice_number}
-Issue Date: ${formatDate(templateData.issue_date)}
-
-*PAID IN FULL*
-Amount: ${formatCurrency(templateData.total)}
-${payments.length === 1 ? `Paid on: ${formatDate(payments[0].date)}` : `${payments.length} payments received`}
-
-────────────────
-
-Please see the attached invoice PDF for your records.
-
-Thank you for your business!
-
-${businessName}`;
+        whatsappMessage = `Hi ${templateData.client.name.split(' ')[0]},\\n\\nThank you for your payment! Here's your final invoice showing payment received.\\n\\n*INVOICE DETAILS*\\nInvoice Number: ${templateData.invoice_number}\\nIssue Date: ${formatDate(templateData.issue_date)}\\n\\n*PAID IN FULL*\\nAmount: ${formatCurrency(templateData.total)}\\n${payments.length === 1 ? `Paid on: ${formatDate(payments[0].date)}` : `${payments.length} payments received`}\\n\\n────────────────\\n\\nPlease see the attached invoice PDF for your records.\\n\\nThank you for your business!\\n\\n${businessName}`;
       } else {
         // No payments - standard invoice
-        whatsappMessage = `Hi ${templateData.client.name.split(' ')[0]},
-
-I'm resending your invoice for your recent work.
-
-*INVOICE DETAILS*
-Invoice Number: ${templateData.invoice_number}
-Issue Date: ${formatDate(templateData.issue_date)}
-
-*TOTAL AMOUNT*
-${formatCurrency(templateData.total)}
-
-*DUE DATE*
-${formatDate(templateData.due_date)}
-
-────────────────
-
-Please see the attached invoice PDF for full details.
-
-Thank you for your business!
-
-${businessName}`;
+        whatsappMessage = `Hi ${templateData.client.name.split(' ')[0]},\\n\\nI'm resending your invoice for your recent work.\\n\\n*INVOICE DETAILS*\\nInvoice Number: ${templateData.invoice_number}\\nIssue Date: ${formatDate(templateData.issue_date)}\\n\\n*TOTAL AMOUNT*\\n${formatCurrency(templateData.total)}\\n\\n*DUE DATE*\\n${formatDate(templateData.due_date)}\\n\\n────────────────\\n\\nPlease see the attached invoice PDF for full details.\\n\\nThank you for your business!\\n\\n${businessName}`;
       }
 
       const whatsappUrl = `https://wa.me/${formatPhoneForWhatsApp(clientPhone, '+44')}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -632,8 +579,6 @@ ${businessName}`;
         invoice.status = "sent";
         invoice.sentAt = new Date().toISOString();
       }
-      
-      toast.success('Invoice sent via WhatsApp!');
     } catch (error) {
       console.error('Failed to resend invoice:', error);
       toast.error('Failed to generate invoice PDF');
@@ -646,6 +591,9 @@ ${businessName}`;
         toast.error('Invoice data not loaded yet');
         return;
       }
+      
+      // Show "Generating invoice..." toast
+      const loadingToast = toast.loading('Generating invoice...');
       
       const selectedTemplate = invoice?.selectedTemplate || branding?.selected_template || 'classic';
       
@@ -666,7 +614,9 @@ ${businessName}`;
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success('Invoice PDF downloaded!');
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success('Invoice downloaded');
     } catch (error) {
       console.error('Failed to download PDF:', error);
       toast.error('Failed to download invoice PDF');
@@ -732,38 +682,11 @@ ${businessName}`;
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: '#F9FAFB' }}>
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-5 shadow-sm">
-        <div className="flex items-start gap-4 mb-5">
-          <button
-            onClick={onBack}
-            className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-xl transition-colors min-h-[44px] mt-1"
-          >
-            <ArrowLeft size={20} className="text-muted" />
-          </button>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="trades-h1 text-ink font-semibold">
-                {invoice?.number || "Draft Invoice"}
-              </h1>
-              <Badge 
-                className="shrink-0"
-                style={{ 
-                  backgroundColor: statusColor.bg, 
-                  color: statusColor.text,
-                  textTransform: 'capitalize',
-                  fontWeight: '500'
-                }}
-              >
-                {invoice?.status === 'part-paid' ? 'Partial' : (invoice?.status || 'draft')}
-              </Badge>
-            </div>
-          </div>
-        </div>
-        
-
-      </div>
+      {/* Header - Compact AppBar like Settings pages */}
+      <AppBar 
+        title={`${clientData?.name || invoice?.client || 'Client'} • ${invoice?.number || 'Draft'}`}
+        onBack={onBack}
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
@@ -886,6 +809,9 @@ ${businessName}`;
                 <div className="flex-1 min-w-0">
                   <div className="trades-caption text-muted mb-0.5">Client</div>
                   <div className="trades-body text-ink font-medium">{clientData?.name || invoice?.client || 'Unknown'}</div>
+                  {jobData?.title && (
+                    <div className="trades-caption text-muted mt-0.5">{jobData.title}</div>
+                  )}
                   {clientData?.email && (
                     <div className="trades-caption text-muted mt-0.5">{clientData.email}</div>
                   )}
