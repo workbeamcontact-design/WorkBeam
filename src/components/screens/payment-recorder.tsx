@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { toast } from "sonner@2.0.3";
+import { formatCurrencyInput } from "../../utils/currency-input";
 
 interface PaymentRecorderProps {
   job?: any;
@@ -147,9 +148,18 @@ export function PaymentRecorder({ job, onNavigate, onBack }: PaymentRecorderProp
                   placeholder="0"
                   value={customAmount}
                   onChange={(e) => {
-                    setCustomAmount(e.target.value);
+                    const value = e.target.value;
+                    // Allow typing but validate on blur
+                    setCustomAmount(value);
                     setSelectedAmount(null);
                   }}
+                  onBlur={(e) => {
+                    // Format to 2 decimal places on blur
+                    const formatted = formatCurrencyInput(e.target.value);
+                    setCustomAmount(formatted > 0 ? formatted.toFixed(2) : '');
+                  }}
+                  step="0.01"
+                  min="0"
                   className="w-24 h-11"
                   style={{ backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' }}
                 />

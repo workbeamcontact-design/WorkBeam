@@ -10,8 +10,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       closeButton={true}
       expand={false}
       richColors={false}
-      visibleToasts={3}
-      duration={4000}
+      visibleToasts={1}
+      duration={2000}
       swipeable={true}
       dismissible={true}
       style={

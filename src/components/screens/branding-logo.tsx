@@ -275,7 +275,6 @@ export function BrandingLogo({ onNavigate, onBack }: BrandingLogoProps) {
       ...prev,
       [colorKey]: String(color)
     }));
-    toast.success('Color updated');
   };
 
   const handleDirectColorChange = (type: 'primary' | 'secondary', color: string) => {
@@ -300,7 +299,6 @@ export function BrandingLogo({ onNavigate, onBack }: BrandingLogoProps) {
       ...prev,
       [colorKey]: String(color)
     }));
-    toast.success('Color updated');
     setMoreColorsOpen(null);
   };
 

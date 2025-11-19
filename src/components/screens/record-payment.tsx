@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { toast } from "sonner@2.0.3";
 import { api } from "../../utils/api";
 import { useAppStore } from "../../hooks/useAppStore";
+import { formatCurrencyInput } from "../../utils/currency-input";
 
 interface RecordPaymentProps {
   invoice: any;
@@ -101,6 +102,7 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
   const [existingPayments, setExistingPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(true);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState(false); // Prevent double-submit
 
   // Load existing payments for this invoice
   useEffect(() => {
@@ -177,7 +179,15 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
       return;
     }
 
+    // Prevent double-submit
+    if (isSaving) {
+      console.log('⚠️ Payment submission already in progress, ignoring duplicate click');
+      return;
+    }
+
     try {
+      setIsSaving(true); // Disable button during save
+      
       // Calculate new status
       const newTotalPaid = totalPaid + paymentData.amount;
       const newStatus = newTotalPaid >= invoiceTotal ? "paid" : "part-paid";
@@ -238,7 +248,9 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
     } catch (error) {
       console.error('Error recording payment:', error);
       toast.error('Failed to record payment');
+      setIsSaving(false); // Re-enable button on error
     }
+    // Note: Don't set isSaving to false on success since we're navigating away
   };
 
   const isValidAmount = paymentData.amount > 0 && paymentData.amount <= currentBalance;
@@ -348,6 +360,14 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
                 ...prev, 
                 amount: parseFloat(e.target.value) || 0 
               }))}
+              onBlur={(e) => {
+                // Format to 2 decimal places on blur
+                const formatted = formatCurrencyInput(e.target.value);
+                setPaymentData(prev => ({ 
+                  ...prev, 
+                  amount: formatted 
+                }));
+              }}
               min="0"
               max={currentBalance}
               step="0.01"
@@ -542,7 +562,7 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
           {/* Record Payment FAB - Green */}
           <button
             onClick={handleSave}
-            disabled={!isValidAmount}
+            disabled={!isValidAmount || isSaving}
             className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
             style={{ 
               backgroundColor: '#16A34A', 
@@ -552,7 +572,14 @@ export function RecordPayment({ invoice, onNavigate, onBack }: RecordPaymentProp
               minHeight: '44px'
             }}
           >
-            <span className="trades-body">Record Payment</span>
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                <span className="trades-body">Saving...</span>
+              </>
+            ) : (
+              <span className="trades-body">Record Payment</span>
+            )}
           </button>
         </div>
       </div>

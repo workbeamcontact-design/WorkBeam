@@ -29,6 +29,7 @@ import {
   formatClientName,
   formatJobTitle 
 } from "../../utils/document-naming";
+import { formatCurrencyInput } from "../../utils/currency-input";
 
 interface GenerateInvoiceProps {
   job: any;
@@ -1202,6 +1203,9 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
       
       // Generate and download PDF with WhatsApp integration
       try {
+        // Show loading toast
+        const loadingToast = toast.loading('Generating invoice...');
+        
         // Check if client has phone number for WhatsApp
         if (clientData?.phone) {
           const formattedPhone = formatPhoneForWhatsApp(clientData.phone, '+44');
@@ -1223,7 +1227,8 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
             formattedPhone
           );
           
-          toast.success(`Invoice ${invoice.number} sent via WhatsApp!`);
+          toast.dismiss(loadingToast);
+          toast.success('Invoice downloaded, redirecting to WhatsApp');
         } else {
           // Fallback to just downloading PDF if no phone number
           await downloadTemplatePDF(
@@ -1241,11 +1246,11 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
             bankDetails
           );
           
-          toast.success(`Invoice ${invoice.number} created!`);
+          toast.dismiss(loadingToast);
+          toast.success('Invoice downloaded');
         }
       } catch (pdfError) {
         console.error('PDF generation failed:', pdfError);
-        toast.success(`Invoice ${invoice.number} created successfully!`);
         toast.error('PDF generation failed');
       }
       
@@ -1663,6 +1668,15 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
                           ...prev, 
                           depositAmount: parseFloat(e.target.value) || 0 
                         }))}
+                        onBlur={(e) => {
+                          // Format to 2 decimal places on blur
+                          const formatted = formatCurrencyInput(e.target.value);
+                          setInvoiceData(prev => ({ 
+                            ...prev, 
+                            depositAmount: formatted 
+                          }));
+                        }}
+                        step="0.01"
                       />
                     </div>
                   )}
@@ -1913,27 +1927,16 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
               </p>
             </div>
 
-            {/* Live Preview Section - Exact same as Quote Builder */}
-            <div className="bg-white rounded-xl p-4 border mb-6" style={{ borderColor: 'var(--border)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="trades-h2" style={{ color: 'var(--ink)' }}>Live Preview</h3>
-                <button
-                  onClick={() => setShowFullSizeViewer(!showFullSizeViewer)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  style={{ color: 'var(--primary)' }}
-                >
-                  <Eye size={16} />
-                  <span className="trades-caption">{showFullSizeViewer ? 'Hide' : 'Show'}</span>
-                </button>
-              </div>
-              
-              <p className="trades-caption mb-4" style={{ color: 'var(--muted)' }}>
+            {/* Live Preview Section */}
+            <div className="mb-6">
+              <h3 className="trades-h2 mb-2 px-4" style={{ color: 'var(--ink)' }}>Live Preview</h3>
+              <p className="trades-caption mb-4 px-4" style={{ color: 'var(--muted)' }}>
                 See how your invoice will appear when printed or saved as PDF
               </p>
 
-              {showFullSizeViewer && (
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <div className="bg-gray-100" style={{ height: '300px' }}>
+              <div className="px-4">
+                <InvoicePreviewCard onViewFullSize={() => setShowFullSizeViewer(true)}>
+                  <div className="bg-gray-100" style={{ height: '450px' }}>
                     {templateData && branding && (
                       <A4FitWrapper>
                         <InvoiceA4Page>
@@ -1967,18 +1970,8 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
                       </div>
                     )}
                   </div>
-                </div>
-              )}
-
-              {!showFullSizeViewer && (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <Eye size={32} className="mx-auto mb-3 text-muted" />
-                  <p className="trades-body text-ink mb-2">Preview Your Invoice</p>
-                  <p className="trades-caption text-muted">
-                    Click "Show" to see how your invoice will look as a PDF
-                  </p>
-                </div>
-              )}
+                </InvoicePreviewCard>
+              </div>
             </div>
 
             {/* Summary */}
@@ -2151,6 +2144,37 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
           )}
         </div>
       </div>
+
+      {/* Full-Size A4 Invoice Viewer Modal */}
+      {templateData && branding && (
+        <InvoiceA4Viewer
+          isOpen={showFullSizeViewer}
+          onClose={() => setShowFullSizeViewer(false)}
+          title="Invoice Preview"
+          onExport={() => {
+            // Use existing download handler
+            toast.success('Export feature coming soon');
+          }}
+        >
+          <div className="pdf-optimized">
+            <TemplateRenderer
+              templateId={branding?.selected_template || 'classic'}
+              document={templateData}
+              documentType="invoice"
+              branding={{
+                logo_url: branding?.logo_url,
+                primary_color: branding?.invoice_use_brand_colors ? branding?.primary_color : '#0A84FF',
+                secondary_color: branding?.invoice_use_brand_colors ? branding?.accent_color : '#42A5F5',
+                business_name: branding?.business_name || businessData?.companyName || businessData?.company_name || 'Your Business',
+                invoice_use_brand_colors: branding?.invoice_use_brand_colors || false
+              }}
+              logoPosition={branding?.invoice_logo_position || 'left'}
+              preview={true}
+              bankDetails={bankDetails}
+            />
+          </div>
+        </InvoiceA4Viewer>
+      )}
     </div>
   );
 }

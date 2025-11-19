@@ -13,6 +13,7 @@ import { useAutosave, AutosaveStatus } from "../../hooks/useAutosave";
 import { quoteSchema, validate, formatValidationErrors } from "../../utils/validation.tsx";
 import { deepSanitize } from "../../utils/sanitization";
 import { useBranding } from "../../utils/branding-context";
+import { formatCurrencyInput } from "../../utils/currency-input";
 
 interface QuoteBuilderProps {
   job?: any;
@@ -519,10 +520,14 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
                             placeholder="Price"
                             value={item.price || ''}
                             onChange={(e) => updateLineItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                            className="h-8 text-right trades-caption"
-                            style={{ backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' }}
-                            min="0"
+                            onBlur={(e) => {
+                              // Format to 2 decimal places on blur
+                              const formatted = formatCurrencyInput(e.target.value);
+                              updateLineItem(item.id, 'price', formatted);
+                            }}
                             step="0.01"
+                            min="0"
+                            className="h-11"
                           />
                         </div>
                         

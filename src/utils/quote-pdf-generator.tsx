@@ -557,8 +557,6 @@ export async function downloadQuotePDFWithTemplate(
   quote: QuoteData,
   client: ClientData
 ): Promise<void> {
-  const loadingToast = toast.loading('Downloading quote...');
-  
   try {
     const pdfBlob = await generateQuotePDFWithTemplate(quote, client);
     
@@ -575,13 +573,8 @@ export async function downloadQuotePDFWithTemplate(
     // Clean up
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     
-    toast.dismiss(loadingToast);
-    toast.success('Quote downloaded');
-    
   } catch (error) {
     console.error('Failed to download quote PDF:', error);
-    toast.dismiss(loadingToast);
-    toast.error('Failed to download quote');
     throw error;
   }
 }

@@ -9,6 +9,8 @@ import { downloadQuoteAndOpenWhatsApp, downloadQuotePDF } from "../../utils/pdf-
 import { downloadQuoteWithTemplateAndOpenWhatsApp, downloadQuotePDFWithTemplate } from "../../utils/quote-pdf-generator";
 import { A4FitWrapper } from "../ui/a4-fit-wrapper";
 import { InvoiceA4Page } from "../ui/invoice-a4-page";
+import { InvoiceA4Viewer } from "../ui/invoice-a4-viewer";
+import { InvoicePreviewCard } from "../ui/invoice-preview-card";
 import { TemplateRenderer } from "../ui/invoice-templates/template-renderer";
 import { useBranding } from "../../utils/branding-context";
 import { AttributionDisplay } from "../ui/attribution-display";
@@ -26,6 +28,7 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showFullSizeViewer, setShowFullSizeViewer] = useState(false);
   const [businessDetails, setBusinessDetails] = useState<any>(null);
   
   // Use BrandingContext to get live branding data that auto-updates
@@ -475,89 +478,63 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
 
           {/* Live Preview Section - Only show for draft or pending/sent quotes */}
           {(quoteData?.status === 'draft' || quoteData?.status === 'sent' || quoteData?.status === 'pending') && (
-            <div className="bg-white rounded-xl p-4 border" style={{ borderColor: '#E5E7EB' }}>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="trades-h2 mb-1" style={{ color: '#111827' }}>Live Preview</h3>
-                  {!businessDetails && (
-                    <p className="trades-caption" style={{ color: '#F59E0B' }}>
-                      Using default business info
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  style={{ color: '#0A84FF' }}
-                >
-                  <Eye size={16} />
-                  <span className="trades-caption">{showPreview ? 'Hide' : 'Show'}</span>
-                </button>
+            <div className="mb-6">
+              <div className="mb-4">
+                <h3 className="trades-h2 mb-1" style={{ color: '#111827' }}>Live Preview</h3>
+                {!businessDetails && (
+                  <p className="trades-caption" style={{ color: '#F59E0B' }}>
+                    Using default business info
+                  </p>
+                )}
               </div>
               
               <p className="trades-caption mb-4" style={{ color: '#6B7280' }}>
                 See how your quote will appear when printed or saved as PDF
               </p>
 
-              {showPreview && (
-                <div className="border rounded-lg overflow-hidden" style={{ borderColor: '#E5E7EB' }}>
-                  <div className="bg-gray-100" style={{ height: '400px' }}>
-                    {!loading && quoteData ? (
-                      <div className="relative h-full">
-                        <div className="absolute inset-0 overflow-auto">
-                          <A4FitWrapper>
-                            <InvoiceA4Page>
-                              <div className="pdf-optimized">
-                                <TemplateRenderer
-                                  templateId={branding?.selected_template || 'classic'}
-                                  document={convertToTemplateFormat()}
-                                  documentType="quote"
-                                  branding={{
-                                    logo_url: branding?.logo_url,
-                                    primary_color: branding?.primary_color || '#0A84FF',
-                                    secondary_color: branding?.accent_color || '#42A5F5',
-                                    business_name: businessDetails?.companyName || 'Your Business',
-                                    invoice_use_brand_colors: branding?.invoice_use_brand_colors
-                                  }}
-                                  logoPosition={branding?.invoice_logo_position || 'left'}
-                                  preview={true}
-                                />
-                              </div>
-                            </InvoiceA4Page>
-                          </A4FitWrapper>
+              <InvoicePreviewCard onViewFullSize={() => setShowFullSizeViewer(true)}>
+                <div className="bg-gray-100" style={{ height: '450px' }}>
+                  {!loading && quoteData ? (
+                    <A4FitWrapper>
+                      <InvoiceA4Page>
+                        <div className="pdf-optimized">
+                          <TemplateRenderer
+                            templateId={branding?.selected_template || 'classic'}
+                            document={convertToTemplateFormat()}
+                            documentType="quote"
+                            branding={{
+                              logo_url: branding?.logo_url,
+                              primary_color: branding?.primary_color || '#0A84FF',
+                              secondary_color: branding?.accent_color || '#42A5F5',
+                              business_name: businessDetails?.companyName || 'Your Business',
+                              invoice_use_brand_colors: branding?.invoice_use_brand_colors
+                            }}
+                            logoPosition={branding?.invoice_logo_position || 'left'}
+                            preview={true}
+                          />
                         </div>
+                      </InvoiceA4Page>
+                    </A4FitWrapper>
+                  ) : loading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-2" style={{ borderColor: '#0A84FF' }}></div>
+                        <p className="trades-caption" style={{ color: '#6B7280' }}>Loading preview...</p>
                       </div>
-                    ) : loading ? (
-                      <div className="flex items-center justify-center h-full">
-                        <div className="text-center">
-                          <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-2" style={{ borderColor: '#0A84FF' }}></div>
-                          <p className="trades-caption" style={{ color: '#6B7280' }}>Loading preview...</p>
-                        </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <FileText size={32} className="mx-auto mb-3" style={{ color: '#9CA3AF' }} />
+                        <p className="trades-body mb-2" style={{ color: '#111827' }}>Preview Unavailable</p>
+                        <p className="trades-caption" style={{ color: '#6B7280' }}>
+                          Quote data is loading...
+                        </p>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <div className="text-center">
-                          <FileText size={32} className="mx-auto mb-3" style={{ color: '#9CA3AF' }} />
-                          <p className="trades-body mb-2" style={{ color: '#111827' }}>Preview Unavailable</p>
-                          <p className="trades-caption" style={{ color: '#6B7280' }}>
-                            Quote data is loading...
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {!showPreview && (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <Eye size={32} className="mx-auto mb-3" style={{ color: '#9CA3AF' }} />
-                  <p className="trades-body mb-2" style={{ color: '#111827' }}>Preview Your Quote</p>
-                  <p className="trades-caption" style={{ color: '#6B7280' }}>
-                    Click "Show" to see how your quote will look as a PDF
-                  </p>
-                </div>
-              )}
+              </InvoicePreviewCard>
             </div>
           )}
 
@@ -881,6 +858,35 @@ export function QuoteDetail({ quote, onNavigate, onBack }: QuoteDetailProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Full-Size A4 Quote Viewer Modal */}
+      {quoteData && branding && (
+        <InvoiceA4Viewer
+          isOpen={showFullSizeViewer}
+          onClose={() => setShowFullSizeViewer(false)}
+          title={`Quote ${quoteData.number || 'Preview'}`}
+          onExport={() => {
+            handleDownloadPDF();
+          }}
+        >
+          <div className="pdf-optimized">
+            <TemplateRenderer
+              templateId={branding?.selected_template || 'classic'}
+              document={convertToTemplateFormat()}
+              documentType="quote"
+              branding={{
+                logo_url: branding?.logo_url,
+                primary_color: branding?.primary_color || '#0A84FF',
+                secondary_color: branding?.accent_color || '#42A5F5',
+                business_name: businessDetails?.companyName || 'Your Business',
+                invoice_use_brand_colors: branding?.invoice_use_brand_colors
+              }}
+              logoPosition={branding?.invoice_logo_position || 'left'}
+              preview={true}
+            />
+          </div>
+        </InvoiceA4Viewer>
       )}
     </div>
   );

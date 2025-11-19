@@ -544,6 +544,7 @@ export async function generateTemplatePDF(
 /**
  * Downloads a document PDF using the selected template
  * NOTE: For invoices with WhatsApp, use downloadInvoiceWithTemplateAndOpenWhatsApp instead
+ * NOTE: Toast messages are handled by the calling component
  */
 export async function downloadTemplatePDF(
   templateId: string,
@@ -552,8 +553,6 @@ export async function downloadTemplatePDF(
   branding: any,
   bankDetails?: any
 ): Promise<void> {
-  const loadingToast = toast.loading(`Generating ${documentType}...`);
-  
   try {
     // Generate the actual PDF blob using jsPDF (same as quote system)
     const pdfBlob = await generateTemplatePDF(templateId, documentData, documentType, branding, bankDetails);
@@ -601,13 +600,8 @@ export async function downloadTemplatePDF(
     
     console.log('📄 Downloaded PDF with filename:', fileName);
     
-    toast.dismiss(loadingToast);
-    toast.success(`${documentType === 'invoice' ? 'Invoice' : 'Quote'} downloaded, redirecting to WhatsApp`);
-    
   } catch (error) {
     console.error('Failed to generate PDF:', error);
-    toast.dismiss(loadingToast);
-    toast.error(`Failed to download ${documentType}`);
     throw error;
   }
 }

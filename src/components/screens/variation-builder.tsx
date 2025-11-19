@@ -9,6 +9,7 @@ import { downloadVariationAndOpenWhatsApp } from "../../utils/pdf-generator";
 import { formatPhoneForWhatsApp } from "../../utils/phone-utils";
 import { useAutosave, AutosaveStatus } from "../../hooks/useAutosave";
 import { sanitizeCurrency, sanitizeText } from "../../utils/sanitization";
+import { formatCurrencyInput } from "../../utils/currency-input";
 
 interface VariationBuilderProps {
   job?: any;
@@ -214,10 +215,18 @@ export function VariationBuilder({ job, onNavigate, onBack }: VariationBuilderPr
                   placeholder="0"
                   value={customAmount}
                   onChange={(e) => {
-                    setCustomAmount(e.target.value);
+                    const value = e.target.value;
+                    setCustomAmount(value);
                     setSelectedMoney(null);
                   }}
-                  className="w-20 h-11"
+                  onBlur={(e) => {
+                    // Format to 2 decimal places on blur
+                    const formatted = formatCurrencyInput(e.target.value);
+                    setCustomAmount(formatted > 0 ? formatted.toFixed(2) : '');
+                  }}
+                  step="0.01"
+                  min="0"
+                  className="w-24 h-11"
                   style={{ backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' }}
                 />
               </div>
