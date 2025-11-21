@@ -27,6 +27,7 @@ import { Label } from '../ui/label';
 import { toast } from 'sonner';
 import { sendBookingReminder } from '../../utils/whatsapp-utils';
 import { api } from '../../utils/api';
+import { CountryCodeSelect } from '../ui/country-code-select';
 
 type BookingType = 'survey' | 'installation' | 'repair' | 'inspection';
 type BookingStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
@@ -35,13 +36,16 @@ interface BookingDetailProps {
   booking: {
     id: number;
     type: BookingType;
-    client: string;
+    clientName?: string; // Updated from client
+    client?: string; // Legacy field for backwards compat
     job: string;
     address: string;
     time: string;
+    startTime?: string; // Add startTime field
     endTime: string;
     date: string;
     phone?: string;
+    clientPhone?: string; // Added clientPhone field
     outstanding?: number;
     jobId?: number;
     clientId?: number;
@@ -93,6 +97,21 @@ const getStatusConfig = (status: BookingStatus) => {
     cancelled: { color: '#DC2626', bgColor: '#FEF2F2', label: 'Cancelled' }
   };
   return configs[status];
+};
+
+// Format date to UK format (DD/MM/YYYY)
+const formatDateToUK = (dateString: string): string => {
+  // Handle YYYY-MM-DD format
+  if (dateString.includes('-')) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  }
+  // If already in DD/MM/YYYY format, return as is
+  if (dateString.includes('/')) {
+    return dateString;
+  }
+  // Fallback
+  return dateString;
 };
 
 
@@ -158,9 +177,33 @@ const ConvertToClientModal = ({
   onNavigate: (screen: string, data?: any) => void;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Parse phone number to extract country code
+  const parsePhoneNumber = (phone: string) => {
+    if (!phone) return { countryCode: '+44', phoneNumber: '' };
+    
+    // Check if phone already has country code
+    if (phone.startsWith('+')) {
+      // Extract country code (e.g., +44, +1, etc.)
+      const match = phone.match(/^(\+\d{1,4})(.*)$/);
+      if (match) {
+        return {
+          countryCode: match[1],
+          phoneNumber: match[2].trim()
+        };
+      }
+    }
+    
+    // Default to UK if no country code
+    return { countryCode: '+44', phoneNumber: phone };
+  };
+  
+  const { countryCode: initialCountryCode, phoneNumber: initialPhone } = parsePhoneNumber(booking.clientPhone || booking.phone || '');
+  
   const [formData, setFormData] = useState({
     name: booking.clientName || booking.client || '',
-    phone: booking.clientPhone || booking.phone || '',
+    countryCode: initialCountryCode,
+    phone: initialPhone,
     address: booking.address || '',
     notes: 'Converted from booking'
   });
@@ -177,10 +220,13 @@ const ConvertToClientModal = ({
         return;
       }
 
+      // Combine country code and phone number
+      const fullPhone = `${formData.countryCode}${formData.phone.trim().replace(/^0/, '')}`;
+
       // Create the client
       const newClient = await api.createClient({
         name: formData.name.trim(),
-        phone: formData.phone.trim(),
+        phone: fullPhone,
         address: formData.address.trim(),
         notes: formData.notes
       });
@@ -218,7 +264,7 @@ const ConvertToClientModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="trades-h2">Convert to Client</DialogTitle>
           <DialogDescription>
@@ -237,10 +283,20 @@ const ConvertToClientModal = ({
           </div>
           
           <div>
-            <Label className="trades-label">Phone</Label>
+            <Label className="trades-label">Country Code</Label>
+            <CountryCodeSelect
+              value={formData.countryCode}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, countryCode: value }))}
+              className="mt-1"
+            />
+          </div>
+          
+          <div>
+            <Label className="trades-label">Phone Number</Label>
             <Input
               value={formData.phone}
               onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              placeholder={formData.countryCode === '+44' ? "07123 456 789" : "Enter phone number"}
               className="mt-1"
             />
           </div>
@@ -442,9 +498,6 @@ export const BookingDetailRedesigned: React.FC<BookingDetailProps> = ({
           </Button>
           <div>
             <h1 className="trades-h2 text-gray-900">Booking Details</h1>
-            <p className="trades-caption text-gray-500">
-              {booking.date} • {booking.time}–{booking.endTime}
-            </p>
           </div>
         </div>
         
@@ -485,19 +538,17 @@ export const BookingDetailRedesigned: React.FC<BookingDetailProps> = ({
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="trades-body font-semibold text-gray-900 truncate">
-                    {booking.client}
-                  </h2>
-                  {!booking.isLead && (
-                    <Badge variant="secondary" className="text-xs">Client</Badge>
-                  )}
-                </div>
+                {/* Line 1: Client name */}
+                <h2 className="trades-body font-semibold text-gray-900 truncate mb-1">
+                  {booking.clientName || booking.client || 'Unknown Client'}
+                </h2>
                 
-                <p className="trades-body text-gray-600 mb-2 line-clamp-1">
-                  {booking.job}
+                {/* Line 2: Date and time */}
+                <p className="trades-body text-gray-600 mb-2">
+                  {formatDateToUK(booking.date)} • {booking.startTime || booking.time}–{booking.endTime}
                 </p>
                 
+                {/* Line 3: Booking type badge */}
                 <div className="flex items-center gap-2">
                   <Badge 
                     variant="secondary" 
@@ -509,23 +560,6 @@ export const BookingDetailRedesigned: React.FC<BookingDetailProps> = ({
                   >
                     {typeConfig.label}
                   </Badge>
-                  
-                  <Badge 
-                    variant="secondary"
-                    style={{ 
-                      backgroundColor: statusConfig.bgColor, 
-                      color: statusConfig.color,
-                      border: 'none'
-                    }}
-                  >
-                    {statusConfig.label}
-                  </Badge>
-                  
-                  {booking.outstanding && (
-                    <Badge variant="destructive" className="text-xs">
-                      £{booking.outstanding} outstanding
-                    </Badge>
-                  )}
                 </div>
               </div>
             </div>
@@ -600,14 +634,6 @@ export const BookingDetailRedesigned: React.FC<BookingDetailProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="text-center p-3 bg-red-50 rounded-lg">
-                  <div className="trades-caption text-red-600">Outstanding</div>
-                  <div className="trades-label font-semibold text-red-700">
-                    £{booking.outstanding || 0}
-                  </div>
-                </div>
-              </div>
               <Button 
                 variant="outline" 
                 className="w-full"

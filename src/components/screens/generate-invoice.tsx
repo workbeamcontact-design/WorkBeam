@@ -507,15 +507,31 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
     // Add materials
     if (job?.materials) {
       job.materials.forEach((material: any, index: number) => {
+        // Try multiple property names for price/rate
+        const unitPrice = material.rate || material.price || material.cost || material.unitPrice || material.unit_price || 0;
+        const quantity = material.quantity || material.qty || 1;
+        const total = material.total || material.amount || material.value || (quantity * unitPrice);
+        
+        // Debug logging for materials with 0 total
+        if (total === 0) {
+          console.warn('⚠️ Material with zero total found:', {
+            name: material.name || material.description,
+            rawMaterial: material,
+            calculatedUnitPrice: unitPrice,
+            calculatedQuantity: quantity,
+            calculatedTotal: total
+          });
+        }
+        
         const item = {
           id: `material-${index}`,
           description: material.name || material.description || 'Material',
-          qty: material.quantity || material.qty || 1,
-          unitPrice: material.rate || material.price || 0,
+          qty: quantity,
+          unitPrice: unitPrice,
           type: "materials" as const,
-          totalAmount: material.total || ((material.quantity || material.qty || 1) * (material.rate || material.price || 0)),
+          totalAmount: total,
           billedAmount: 0,
-          remainingAmount: material.total || ((material.quantity || material.qty || 1) * (material.rate || material.price || 0))
+          remainingAmount: total
         };
         items.push(item);
         console.log('➕ Added material:', item.description, formatCurrency(item.totalAmount));
@@ -571,6 +587,17 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
     
     const totalValue = items.reduce((sum, item) => sum + item.remainingAmount, 0);
     console.log('📊 Generated job line items total:', formatCurrency(totalValue));
+    
+    // Warn if we have items but total is 0
+    if (items.length > 0 && totalValue === 0) {
+      console.error('❌ Line items exist but all have zero value! Items:', items.map(item => ({
+        description: item.description,
+        qty: item.qty,
+        unitPrice: item.unitPrice,
+        total: item.totalAmount
+      })));
+      console.error('💡 This usually means materials/labour were added without prices. Please add prices to all items in the job.');
+    }
     
     return items;
   };
@@ -705,9 +732,26 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
     // Second priority: Sum of job line items (materials only, before VAT)
     if (jobLineItems.length > 0) {
       const lineItemsTotal = jobLineItems.reduce((sum, item) => sum + item.remainingAmount, 0);
-      if (lineItemsTotal > 0) {
-        console.log('📊 Using job line items total (subtotal):', formatCurrency(lineItemsTotal));
-        return lineItemsTotal;
+      const totalAmountSum = jobLineItems.reduce((sum, item) => sum + (item.totalAmount || 0), 0);
+      
+      console.log('📊 Checking job line items:', {
+        count: jobLineItems.length,
+        lineItemsTotalFromRemaining: formatCurrency(lineItemsTotal),
+        lineItemsTotalFromTotal: formatCurrency(totalAmountSum),
+        items: jobLineItems.map(item => ({
+          description: item.description,
+          remainingAmount: item.remainingAmount,
+          totalAmount: item.totalAmount,
+          billedAmount: item.billedAmount
+        }))
+      });
+      
+      // Use totalAmount if remainingAmount is 0 (e.g., fully billed items that still need to show)
+      const calculatedTotal = lineItemsTotal > 0 ? lineItemsTotal : totalAmountSum;
+      
+      if (calculatedTotal > 0) {
+        console.log('📊 Using job line items total (subtotal):', formatCurrency(calculatedTotal));
+        return calculatedTotal;
       }
     }
     
@@ -729,12 +773,27 @@ export function GenerateInvoice({ job, onNavigate, onBack }: GenerateInvoiceProp
         total: job?.total,
         value: job?.value,
         hasLineItems: jobLineItems.length > 0,
+        lineItemsData: jobLineItems.map(item => ({
+          description: item.description,
+          totalAmount: item.totalAmount,
+          remainingAmount: item.remainingAmount
+        })),
         hasOriginalQuote: !!originalQuote,
         originalQuoteTotal: originalQuote?.total,
-        originalQuoteSubtotal: originalQuote?.subtotal
+        originalQuoteSubtotal: originalQuote?.subtotal,
+        hasMaterials: !!job?.materials?.length,
+        hasLabour: !!job?.labour?.length
       });
       
       console.warn('⚠️ Using fallback minimum value to prevent broken invoice');
+      
+      // Show helpful message to user
+      if (job?.materials?.length > 0 || job?.labour?.length > 0) {
+        toast.error('⚠️ Materials/labour found but no prices set. Please add prices to all items in the job before creating an invoice.');
+      } else {
+        toast.error('⚠️ No job value found. Please set an estimated value or add materials/labour with prices to the job.');
+      }
+      
       // Last resort: Return a minimum value to prevent 0 totals
       return 100; // £100 minimum to prevent completely broken invoices
     }

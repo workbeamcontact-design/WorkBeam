@@ -2508,5 +2508,27 @@ app.put('/make-server-20084ff3/notification-preferences', async (c) => {
   }
 });
 
-// Start server
-Deno.serve(app.fetch);
+// Log all registered routes on startup for debugging
+console.log('🚀 WorkBeam Server Starting...');
+console.log('📋 Registered routes:');
+console.log('   - Health: GET /make-server-20084ff3/health');
+console.log('   - Organization: POST /make-server-20084ff3/organization/auto-setup');
+console.log('   - Organization: GET /make-server-20084ff3/organization/check');
+console.log('   - Organization: GET /make-server-20084ff3/organization/info');
+console.log('   - Organization: GET /make-server-20084ff3/organization/members');
+console.log('   - Org Data: GET /make-server-20084ff3/org-data/*');
+console.log('   - Auth: POST /make-server-20084ff3/signup');
+console.log('   - Subscription: GET /make-server-20084ff3/subscription/status');
+console.log('   - Subscription: POST /make-server-20084ff3/subscription/webhook');
+console.log('✅ Server ready to accept requests');
+
+// Start server with error handling
+try {
+  Deno.serve(app.fetch);
+  console.log('✅ Deno server started successfully');
+} catch (error) {
+  console.error('❌ FATAL: Failed to start server:', error);
+  console.error('   Error details:', error instanceof Error ? error.message : error);
+  console.error('   Stack trace:', error instanceof Error ? error.stack : 'No stack available');
+  throw error; // Re-throw to ensure Supabase logs the error
+}

@@ -21,13 +21,14 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
   const [countryCode, setCountryCode] = useState("+44"); // Default to UK
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [cityPostcode, setCityPostcode] = useState("");
+  const [city, setCity] = useState("");
+  const [postcode, setPostcode] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
   // Autosave draft functionality (saves draft to localStorage only)
-  const formData = { fullName, countryCode, phone, address, cityPostcode, email, notes };
+  const formData = { fullName, countryCode, phone, address, city, postcode, email, notes };
   const autosave = useAutosave(formData, {
     delay: 3000,
     onSave: async (data) => {
@@ -49,7 +50,7 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
     const clientData = {
       name: fullName.trim(),
       phone: formattedPhone,
-      address: `${address.trim()}, ${cityPostcode.trim()}`,
+      address: `${address.trim()}, ${city.trim()}, ${postcode.trim()}`,
       email: email.trim(),
       notes: notes.trim()
     };
@@ -122,7 +123,7 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
         <div className="px-4 pt-4 space-y-4">
           <form onSubmit={handleSaveClient} className="space-y-4">
             {/* Full Name - Required */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+            <div>
               <Label htmlFor="fullName" className="trades-label block mb-2" style={{ color: '#111827' }}>
                 Full Name *
               </Label>
@@ -132,26 +133,33 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter full name…"
-                className="h-11 border-0 p-0"
-                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  backgroundColor: fullName ? 'transparent' : '#F9FAFB',
+                  borderColor: fullName ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
                 required
               />
             </div>
 
             {/* Country Code - Required */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+            <div>
               <Label htmlFor="countryCode" className="trades-label block mb-2" style={{ color: '#111827' }}>
                 Country *
               </Label>
               <CountryCodeSelect
                 value={countryCode}
                 onValueChange={setCountryCode}
-                className="border-0 p-0"
+                className="h-11 rounded-lg border-2 transition-all focus:border-blue-500"
+                style={{
+                  borderColor: '#E5E7EB'
+                }}
               />
             </div>
 
             {/* Phone Number - Required */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+            <div>
               <Label htmlFor="phone" className="trades-label block mb-2" style={{ color: '#111827' }}>
                 Phone Number *
               </Label>
@@ -161,8 +169,12 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder={countryCode === '+44' ? "07123 456 789" : "Enter phone number"}
-                className="h-11 border-0 p-0"
-                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  backgroundColor: phone ? 'transparent' : '#F9FAFB',
+                  borderColor: phone ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
                 required
               />
               <p className="trades-caption mt-2" style={{ color: '#6B7280' }}>
@@ -171,7 +183,7 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
             </div>
 
             {/* Address - Required */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+            <div>
               <Label htmlFor="address" className="trades-label block mb-2" style={{ color: '#111827' }}>
                 Address *
               </Label>
@@ -181,31 +193,60 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Street address…"
-                className="h-11 border-0 p-0"
-                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  backgroundColor: address ? 'transparent' : '#F9FAFB',
+                  borderColor: address ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
                 required
               />
             </div>
 
-            {/* City & Postcode - Required */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
-              <Label htmlFor="cityPostcode" className="trades-label block mb-2" style={{ color: '#111827' }}>
-                City & Postcode *
+            {/* City - Required */}
+            <div>
+              <Label htmlFor="city" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                City *
               </Label>
               <Input
-                id="cityPostcode"
+                id="city"
                 type="text"
-                value={cityPostcode}
-                onChange={(e) => setCityPostcode(e.target.value)}
-                placeholder="Manchester M1…"
-                className="h-11 border-0 p-0"
-                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Manchester…"
+                className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  backgroundColor: city ? 'transparent' : '#F9FAFB',
+                  borderColor: city ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
+                required
+              />
+            </div>
+
+            {/* Postcode - Required */}
+            <div>
+              <Label htmlFor="postcode" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                Postcode *
+              </Label>
+              <Input
+                id="postcode"
+                type="text"
+                value={postcode}
+                onChange={(e) => setPostcode(e.target.value)}
+                placeholder="M1…"
+                className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  backgroundColor: postcode ? 'transparent' : '#F9FAFB',
+                  borderColor: postcode ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
                 required
               />
             </div>
 
             {/* Email - Optional */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+            <div>
               <Label htmlFor="email" className="trades-label block mb-2" style={{ color: '#111827' }}>
                 Email
               </Label>
@@ -215,13 +256,17 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="client@example.com"
-                className="h-11 border-0 p-0"
-                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  backgroundColor: email ? 'transparent' : '#F9FAFB',
+                  borderColor: email ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
               />
             </div>
 
             {/* Notes - Optional, multi-line expandable */}
-            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+            <div>
               <Label htmlFor="notes" className="trades-label block mb-2" style={{ color: '#111827' }}>
                 Notes
               </Label>
@@ -231,8 +276,12 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Additional client information…"
                 rows={3}
-                className="border-0 p-0 resize-none min-h-[72px]"
-                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                className="px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0 resize-none min-h-[72px]"
+                style={{ 
+                  backgroundColor: notes ? 'transparent' : '#F9FAFB',
+                  borderColor: notes ? '#E5E7EB' : '#D1D5DB',
+                  color: '#111827'
+                }}
               />
             </div>
 
@@ -250,7 +299,7 @@ export function NewClient({ onNavigate, onBack }: NewClientProps) {
       <div className="absolute bottom-20 left-0 right-0 px-4">
         <button
           onClick={handleSaveClient}
-          disabled={!fullName.trim() || !phone.trim() || !address.trim() || !cityPostcode.trim() || saving}
+          disabled={!fullName.trim() || !phone.trim() || !address.trim() || !city.trim() || !postcode.trim() || saving}
           className="w-full flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
           style={{ 
             backgroundColor: '#0A84FF',

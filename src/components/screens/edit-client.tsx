@@ -30,7 +30,8 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
   const [countryCode, setCountryCode] = useState("+44"); // Default to UK
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [cityPostcode, setCityPostcode] = useState("");
+  const [city, setCity] = useState("");
+  const [postcode, setPostcode] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -38,12 +39,12 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Autosave functionality
-  const formData = { fullName, countryCode, phone, address, cityPostcode, email, notes };
+  const formData = { fullName, countryCode, phone, address, city, postcode, email, notes };
   const autosave = useAutosave(formData, {
     delay: 3000, // 3 seconds for edit screen
     onSave: async (data) => {
       // Only autosave if form is valid
-      if (!data.fullName.trim() || !data.phone.trim() || !data.address.trim() || !data.cityPostcode.trim()) {
+      if (!data.fullName.trim() || !data.phone.trim() || !data.address.trim() || !data.city.trim() || !data.postcode.trim()) {
         return; // Skip autosave for invalid data
       }
       
@@ -51,7 +52,7 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
       await api.updateClient(client.id, {
         name: data.fullName.trim(),
         phone: formattedPhone,
-        address: `${data.address.trim()}, ${data.cityPostcode.trim()}`,
+        address: `${data.address.trim()}, ${data.city.trim()}, ${data.postcode.trim()}`,
         email: data.email.trim(),
         notes: data.notes.trim()
       });
@@ -93,15 +94,34 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
         }
       }
 
-      // Parse address to separate street from city/postcode
+      // Parse address to separate street, city, and postcode
       if (client.address) {
         const addressParts = client.address.split(', ');
-        if (addressParts.length >= 2) {
-          // Last part is likely city/postcode, everything else is street address
-          const cityPostcodePart = addressParts[addressParts.length - 1];
-          const streetPart = addressParts.slice(0, -1).join(', ');
+        if (addressParts.length >= 3) {
+          // Format: "Street, City, Postcode"
+          const postcodePart = addressParts[addressParts.length - 1];
+          const cityPart = addressParts[addressParts.length - 2];
+          const streetPart = addressParts.slice(0, -2).join(', ');
           setAddress(streetPart);
-          setCityPostcode(cityPostcodePart);
+          setCity(cityPart);
+          setPostcode(postcodePart);
+        } else if (addressParts.length === 2) {
+          // Legacy format: "Street, City Postcode" - try to split city and postcode
+          const streetPart = addressParts[0];
+          const cityPostcodePart = addressParts[1];
+          setAddress(streetPart);
+          
+          // Try to extract postcode (UK postcode pattern)
+          const postcodeMatch = cityPostcodePart.match(/\b([A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2})\b$/i);
+          if (postcodeMatch) {
+            const postcodePart = postcodeMatch[1];
+            const cityPart = cityPostcodePart.substring(0, cityPostcodePart.length - postcodePart.length).trim();
+            setCity(cityPart);
+            setPostcode(postcodePart);
+          } else {
+            // Can't parse, put it all in city
+            setCity(cityPostcodePart);
+          }
         } else {
           setAddress(client.address);
         }
@@ -120,7 +140,7 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
       id: client.id,
       name: fullName.trim(),
       phone: formattedPhone,
-      address: `${address.trim()}, ${cityPostcode.trim()}`,
+      address: `${address.trim()}, ${city.trim()}, ${postcode.trim()}`,
       email: email.trim(),
       notes: notes.trim()
     };
@@ -280,17 +300,34 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
               />
             </div>
 
-            {/* City & Postcode - Required */}
+            {/* City - Required */}
             <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
-              <Label htmlFor="cityPostcode" className="trades-label block mb-2" style={{ color: '#111827' }}>
-                City & Postcode *
+              <Label htmlFor="city" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                City *
               </Label>
               <Input
-                id="cityPostcode"
+                id="city"
                 type="text"
-                value={cityPostcode}
-                onChange={(e) => setCityPostcode(e.target.value)}
-                placeholder="Manchester M1…"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Manchester…"
+                className="h-11 border-0 p-0"
+                style={{ backgroundColor: 'transparent', color: '#111827' }}
+                required
+              />
+            </div>
+
+            {/* Postcode - Required */}
+            <div className="bg-white rounded-xl p-3 border" style={{ borderColor: '#E5E7EB' }}>
+              <Label htmlFor="postcode" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                Postcode *
+              </Label>
+              <Input
+                id="postcode"
+                type="text"
+                value={postcode}
+                onChange={(e) => setPostcode(e.target.value)}
+                placeholder="M1…"
                 className="h-11 border-0 p-0"
                 style={{ backgroundColor: 'transparent', color: '#111827' }}
                 required
@@ -364,7 +401,7 @@ export function EditClient({ client, onNavigate, onBack }: EditClientProps) {
           {/* Update Button */}
           <button
             onClick={handleUpdateClient}
-            disabled={!fullName.trim() || !phone.trim() || !address.trim() || !cityPostcode.trim() || saving || deleting}
+            disabled={!fullName.trim() || !phone.trim() || !address.trim() || !city.trim() || !postcode.trim() || saving || deleting}
             className="flex-1 flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
             style={{ 
               backgroundColor: '#0A84FF',

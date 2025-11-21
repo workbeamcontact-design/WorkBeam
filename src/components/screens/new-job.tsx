@@ -139,7 +139,18 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
     }
   };
 
-
+  // Check if form is valid for submission
+  const isFormValid = () => {
+    // Must have a title
+    if (!jobTitle.trim()) return false;
+    
+    // Must have at least one item with description and price
+    const hasValidItem = lineItems.some(item => 
+      item.description.trim() && Number(item.price) > 0
+    );
+    
+    return hasValidItem;
+  };
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: '#F9FAFB' }}>
@@ -162,12 +173,16 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
                 placeholder="Enter job title..."
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
-                className="border-0 p-0 h-auto trades-h2 font-semibold text-left"
-                style={{ color: '#111827', backgroundColor: 'transparent' }}
+                className="h-auto trades-h2 font-semibold text-left px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  color: '#111827', 
+                  backgroundColor: jobTitle ? 'transparent' : '#F9FAFB',
+                  borderColor: jobTitle ? '#E5E7EB' : '#D1D5DB'
+                }}
               />
             </div>
 
-            <p className="trades-caption" style={{ color: '#6B7280' }}>
+            <p className="trades-body" style={{ color: '#6B7280' }}>
               Client: {clientData?.name || "Loading client..."}
             </p>
             {clientData?.address && (
@@ -180,7 +195,7 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
           {/* Line Items */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="trades-h2" style={{ color: '#111827' }}>Materials & Labour</h3>
+              <h3 className="trades-h2" style={{ color: '#111827' }}>Items</h3>
             </div>
             
             <div className="space-y-2">
@@ -190,11 +205,15 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
                     {/* Description (70%) */}
                     <div className="mb-2">
                       <Input
-                        placeholder="Item description"
+                        placeholder="Enter item description..."
                         value={item.description}
                         onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
-                        className="border-0 p-0 h-auto trades-body font-medium"
-                        style={{ color: '#111827' }}
+                        className="h-auto trades-body font-medium px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                        style={{ 
+                          color: '#111827',
+                          backgroundColor: item.description ? 'transparent' : '#F9FAFB',
+                          borderColor: item.description ? '#E5E7EB' : '#D1D5DB'
+                        }}
                       />
                     </div>
                     
@@ -225,7 +244,8 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
                           }}
                           step="0.01"
                           min="0"
-                          className="h-11"
+                          className="h-8 text-center trades-caption"
+                          style={{ backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' }}
                         />
                       </div>
                       
@@ -405,8 +425,12 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="border-0 p-0 resize-none"
-              style={{ backgroundColor: 'transparent', color: '#111827' }}
+              className="resize-none px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+              style={{ 
+                backgroundColor: notes ? 'transparent' : '#F9FAFB', 
+                color: '#111827',
+                borderColor: notes ? '#E5E7EB' : '#D1D5DB'
+              }}
             />
           </div>
         </div>
@@ -416,7 +440,7 @@ export function NewJob({ client, onNavigate, onBack }: NewJobProps) {
       <div className="absolute bottom-20 left-0 right-0 px-4">
         <button
           onClick={handleCreateJob}
-          disabled={!jobTitle.trim() || saving}
+          disabled={!isFormValid() || saving}
           className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {saving ? (

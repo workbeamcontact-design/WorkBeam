@@ -19,6 +19,37 @@ interface DashboardProps {
   refreshKey?: number;
 }
 
+// Booking type colors to match calendar
+const getBookingTypeColor = (type: string): string => {
+  switch (type) {
+    case 'survey':
+      return '#16A34A'; // green
+    case 'installation':
+      return '#0A84FF'; // blue
+    case 'repair':
+      return '#F59E0B'; // orange
+    case 'inspection':
+      return '#A855F7'; // purple
+    default:
+      return '#6B7280'; // gray
+  }
+};
+
+const getBookingTypeBadgeBackground = (type: string): string => {
+  switch (type) {
+    case 'survey':
+      return 'rgba(22, 163, 74, 0.15)'; // green with 15% opacity
+    case 'installation':
+      return 'rgba(10, 132, 255, 0.15)'; // blue with 15% opacity
+    case 'repair':
+      return 'rgba(245, 158, 11, 0.15)'; // orange with 15% opacity
+    case 'inspection':
+      return 'rgba(168, 85, 247, 0.15)'; // purple with 15% opacity
+    default:
+      return 'rgba(107, 114, 128, 0.15)';
+  }
+};
+
 // Simple and reliable date parsing for revenue calculation
 const getPaymentDate = (invoice: any): Date | null => {
   // Priority: paidAtISO > paidAt (DD/MM/YYYY) > updatedAt (if status is paid)
@@ -596,18 +627,66 @@ export function DashboardClean({ onNavigate, refreshKey = 0 }: DashboardProps) {
                 <div
                   key={index}
                   onClick={() => onNavigate('booking-detail', booking)}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-200"
+                  className="cursor-pointer transition-shadow relative rounded-xl border border-gray-200 p-3 hover:shadow-md"
+                  style={{
+                    backgroundColor: 'white',
+                    overflow: 'hidden'
+                  }}
                 >
-                  <div className="w-3 h-3 rounded-full bg-blue-600 flex-shrink-0"></div>
-                  <div className="flex-1">
-                    <div className="trades-body font-medium mb-1" style={{ color: 'var(--ink)' }}>
-                      {formatBookingTime(booking)} • {booking.title}
+                  {/* Left colored stripe */}
+                  <div 
+                    className="absolute left-0 top-0 bottom-0 w-1"
+                    style={{
+                      backgroundColor: getBookingTypeColor(booking.type),
+                      borderTopLeftRadius: '12px',
+                      borderBottomLeftRadius: '12px'
+                    }}
+                  />
+                  
+                  <div className="flex items-center justify-between" style={{ paddingLeft: '8px' }}>
+                    <div className="flex-1 min-w-0">
+                      {/* Time and Client name on same line */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="trades-caption" style={{ color: 'var(--muted)' }}>
+                          {formatBookingTime(booking)}
+                        </span>
+                        <span className="trades-caption" style={{ color: 'var(--muted)' }}>•</span>
+                        <span className="trades-label truncate" style={{ color: 'var(--ink)', fontWeight: '600' }}>
+                          {booking.clientName || booking.client || 'Unknown Client'}
+                        </span>
+                      </div>
+                      
+                      {/* Type badge */}
+                      <div 
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md"
+                        style={{
+                          backgroundColor: getBookingTypeBadgeBackground(booking.type)
+                        }}
+                      >
+                        <div 
+                          className="rounded-full"
+                          style={{ 
+                            backgroundColor: getBookingTypeColor(booking.type),
+                            width: '6px',
+                            height: '6px'
+                          }}
+                        />
+                        <span 
+                          className="trades-caption"
+                          style={{ 
+                            color: getBookingTypeColor(booking.type),
+                            fontWeight: '600',
+                            textTransform: 'capitalize',
+                            fontSize: '11px'
+                          }}
+                        >
+                          {booking.type}
+                        </span>
+                      </div>
                     </div>
-                    <p className="trades-caption" style={{ color: 'var(--muted)' }}>
-                      {booking.client || 'General booking'}
-                    </p>
+                    
+                    <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
                   </div>
-                  <ChevronRight size={16} className="text-gray-400" />
                 </div>
               ))}
             </div>

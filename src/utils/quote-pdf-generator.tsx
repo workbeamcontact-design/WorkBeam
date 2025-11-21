@@ -52,6 +52,13 @@ async function getBusinessAndBrandingData() {
       api.getBranding()
     ]);
 
+    console.log('📝 Quote PDF - Loaded branding data:', {
+      hasLogo: !!branding?.logo_url,
+      logoUrl: branding?.logo_url,
+      primaryColor: branding?.primary_color,
+      selectedTemplate: branding?.selected_template
+    });
+
     const companyName = businessDetails?.companyName || 'Your Business';
     
     let businessAddress = '123 Trade Street, Manchester, M1 1AA';
@@ -89,7 +96,9 @@ async function getBusinessAndBrandingData() {
         logo_url: branding?.logo_url,
         primary_color: branding?.primary_color || '#0A84FF',
         secondary_color: branding?.accent_color || '#16A34A',
-        business_name: companyName
+        business_name: companyName,
+        invoice_use_brand_colors: branding?.invoice_use_brand_colors || false,
+        invoice_logo_position: branding?.invoice_logo_position || 'left'
       },
       selectedTemplate: branding?.selected_template || 'classic'
     };
@@ -500,10 +509,10 @@ export async function generateQuotePDFWithTemplate(
                   primary_color: branding?.primary_color || '#0A84FF',
                   secondary_color: branding?.secondary_color || '#16A34A',
                   business_name: branding?.business_name,
-                  invoice_use_brand_colors: true, // For quotes, always use brand colors if available
-                  invoice_logo_position: 'left'
+                  invoice_use_brand_colors: branding?.invoice_use_brand_colors || false,
+                  invoice_logo_position: branding?.invoice_logo_position || 'left'
                 }}
-                logoPosition="left"
+                logoPosition={branding?.invoice_logo_position || 'left'}
                 preview={true}
               />
             </div>
@@ -533,7 +542,7 @@ export async function generateQuotePDFWithTemplate(
             
             reject(error);
           }
-        }, 800); // Optimized wait time for faster generation
+        }, 2000); // INCREASED: Give more time for logo images and branding to load before PDF capture (was 800ms, now 2000ms to match invoice generation)
         
       } catch (error) {
         console.error('Failed to render template:', error);

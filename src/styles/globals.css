@@ -294,6 +294,7 @@
   /* Mobile-first responsive design */
   html, body {
     height: 100%;
+    overflow: hidden; /* Prevent whole page scrolling */
     overscroll-behavior-y: none; /* Prevent overscroll/rubber-banding */
   }
   
@@ -302,12 +303,14 @@
     html {
       height: 100vh;
       height: 100dvh; /* Dynamic viewport height for better mobile support */
+      overflow: hidden; /* Prevent whole page scrolling */
       overscroll-behavior-y: none; /* Prevent overscroll bounce */
     }
     
     body {
       height: 100vh;
       height: 100dvh;
+      overflow: hidden; /* Prevent whole page scrolling */
       overscroll-behavior-y: none; /* Prevent overscroll bounce */
     }
   }
@@ -972,7 +975,7 @@ html {
     border-radius: 48px; /* iPhone-style rounded corners */
     position: relative;
     margin: 20px auto;
-    overflow: auto; /* Allow scrolling if content exceeds frame */
+    overflow: hidden; /* Prevent root from scrolling - only internal content should scroll */
     transform-origin: center center;
   }
   
@@ -1024,4 +1027,83 @@ html {
     min-height: 100vh;
     min-height: 100dvh;
   }
+}
+
+/**
+ * Toast Notification Custom Styles
+ * Force colored backgrounds for all toast types including loading
+ */
+[data-sonner-toast][data-type="loading"] {
+  background: #0A84FF !important;
+  color: white !important;
+  border: none !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background: #16A34A !important;
+  color: white !important;
+  border: none !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background: #DC2626 !important;
+  color: white !important;
+  border: none !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  background: #F59E0B !important;
+  color: white !important;
+  border: none !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  background: #0A84FF !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* Hide the default Sonner loading icon (the square) and show circular spinner instead */
+[data-sonner-toast][data-type="loading"] [data-icon] {
+  display: none !important;
+}
+
+/* Create a custom white circular spinner */
+[data-sonner-toast][data-type="loading"]::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+  margin-right: 12px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+@keyframes spinner-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast description text color */
+[data-sonner-toast] [data-description] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Close button styling for colored toasts */
+[data-sonner-toast] [data-close-button] {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  border: none !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
 }

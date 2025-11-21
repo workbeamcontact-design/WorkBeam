@@ -32,7 +32,7 @@ interface Booking {
 
 // Constants
 const HOUR_HEIGHT = 88; // 88px per hour - optimized for address text clearance with action icons
-const MIN_BOOKING_HEIGHT = 76; // Minimum height for Day view to align with grid (1 hour = 76px)
+// Removed MIN_BOOKING_HEIGHT - bookings now scale proportionally to their actual duration
 
 // Utility function to get booking type colors
 const getBookingTypeColor = (type: BookingType): string => {
@@ -104,6 +104,7 @@ const BookingCard = ({
   const cardHeightPx = Math.max(64, (durationMinutes / 60) * HOUR_HEIGHT);
   const adaptiveDensity = getAdaptiveDensity(cardHeightPx);
   const hasDebt = booking.outstanding && booking.outstanding > 0;
+  const showTypeBadge = durationMinutes > 30; // Hide type badge for 30-minute bookings
   
   return (
     <div
@@ -114,7 +115,7 @@ const BookingCard = ({
         border: '1px solid',
         borderRadius: '12px',
         padding: '12px',
-        minHeight: view === 'week' ? '96px' : view === 'allday' ? '88px' : '64px', // All-day needs more height for content
+        minHeight: view === 'week' ? '96px' : view === 'allday' ? '88px' : 'auto', // Allow cards to be any height in day view
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         overflow: 'hidden',
         position: 'relative',
@@ -173,48 +174,50 @@ const BookingCard = ({
       </div>
 
       {/* Booking Type Badge - Bottom left */}
-      <div 
-        className="type_badge absolute left-0 flex items-center"
-        style={{ 
-          bottom: '2px', // Perfect positioning - not overlapping, not too low
-          height: '32px',
-          paddingLeft: '16px', // 12px padding + 4px spine
-        }}
-      >
+      {showTypeBadge && (
         <div 
-          className="flex items-center gap-1"
-          style={{
-            backgroundColor: getBookingTypeBadgeBackground(booking.type),
-            borderRadius: '6px',
-            paddingLeft: '6px',    // Reduced from 8px to 6px
-            paddingRight: '6px',   // Reduced from 8px to 6px 
-            paddingTop: '2px',     // Reduced to 2px for tighter spacing
-            paddingBottom: '2px',  // Reduced to 2px for tighter spacing
-            minHeight: '20px',     // Reduced from 24px to 20px
+          className="type_badge absolute left-0 flex items-center"
+          style={{ 
+            bottom: '2px', // Perfect positioning - not overlapping, not too low
+            height: '32px',
+            paddingLeft: '16px', // 12px padding + 4px spine
           }}
         >
           <div 
-            className="rounded-full flex-shrink-0"
-            style={{ 
-              backgroundColor: getBookingTypeColor(booking.type),
-              width: '8px',
-              height: '8px'
-            }}
-          />
-          <span 
-            className="trades-caption"
-            style={{ 
-              color: getBookingTypeColor(booking.type),
-              fontWeight: '600',
-              textTransform: 'capitalize',
-              fontSize: '12px',
-              lineHeight: '16px'
+            className="flex items-center gap-1"
+            style={{
+              backgroundColor: getBookingTypeBadgeBackground(booking.type),
+              borderRadius: '6px',
+              paddingLeft: '6px',    // Reduced from 8px to 6px
+              paddingRight: '6px',   // Reduced from 8px to 6px 
+              paddingTop: '2px',     // Reduced to 2px for tighter spacing
+              paddingBottom: '2px',  // Reduced to 2px for tighter spacing
+              minHeight: '20px',     // Reduced from 24px to 20px
             }}
           >
-            {booking.type}
-          </span>
+            <div 
+              className="rounded-full flex-shrink-0"
+              style={{ 
+                backgroundColor: getBookingTypeColor(booking.type),
+                width: '8px',
+                height: '8px'
+              }}
+            />
+            <span 
+              className="trades-caption"
+              style={{ 
+                color: getBookingTypeColor(booking.type),
+                fontWeight: '600',
+                textTransform: 'capitalize',
+                fontSize: '12px',
+                lineHeight: '16px'
+              }}
+            >
+              {booking.type}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Card Footer - Consistent icon bar with standardized 16px icons */}
       <div 
@@ -923,11 +926,10 @@ export function Calendar({ onNavigate, refreshKey }: CalendarProps) {
                       const gridStartMinutes = 6 * 60; // 6AM in minutes
                       const relativeStartMinutes = startTotalMinutes - gridStartMinutes;
                       
-                      // Convert to pixel positions (76px per hour = 76px per 60 minutes)
+                      // Convert to pixel positions (88px per hour = 88px per 60 minutes)
                       // Add 12px offset to align with time labels (same as grid lines)
                       const top = (relativeStartMinutes / 60) * HOUR_HEIGHT + 12;
-                      const calculatedHeight = (durationMinutes / 60) * HOUR_HEIGHT;
-                      const height = Math.max(MIN_BOOKING_HEIGHT, calculatedHeight);
+                      const height = (durationMinutes / 60) * HOUR_HEIGHT; // True proportional sizing - 30 min = 44px, 60 min = 88px
                       
                       return (
                         <div

@@ -53,6 +53,7 @@ export function ScreenLayout({
         style={{ 
           overscrollBehavior: 'contain',
           WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
           paddingBottom: footer 
             ? (showNavSpacing ? '176px' : '96px') // 64px (nav) + 112px (footer+padding) OR just 96px footer
             : (showNavSpacing ? '80px' : '0px')  // Just nav spacing OR nothing
@@ -61,10 +62,12 @@ export function ScreenLayout({
         {children}
       </div>
 
-      {/* Footer */}
+      {/* Footer - Fixed position to prevent scrolling */}
       {footer && (
-        <div className="absolute bottom-20 left-0 right-0 px-4 bg-surface-alt z-10">
-          {footer}
+        <div className="fixed bottom-20 left-0 right-0 px-4 bg-surface-alt z-10 pointer-events-none">
+          <div className="pointer-events-auto">
+            {footer}
+          </div>
         </div>
       )}
     </div>

@@ -61,6 +61,10 @@ interface BookingFormData {
     countryCode: string;
     phone: string;
     address: string;
+    city: string;
+    postcode: string;
+    email: string;
+    notes: string;
   };
   
   // Step 2: Type & When
@@ -309,10 +313,17 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
       ? `${formData.newClient.countryCode || '+44'}${formData.newClient.phone.trim().replace(/^0/, '')}`
       : '';
     
+    // Combine address parts for new leads (Street, City, Postcode)
+    const newLeadAddress = formData.newClient?.address && formData.newClient?.city && formData.newClient?.postcode
+      ? `${formData.newClient.address.trim()}, ${formData.newClient.city.trim()}, ${formData.newClient.postcode.trim()}`
+      : formData.newClient?.address || '';
+    
     const bookingData = {
       clientId: clientId?.toString(),
       clientName: isExistingClient ? selectedClient.name : formData.newClient?.name || 'New Lead',
       clientPhone: isExistingClient ? selectedClient.phone : newLeadPhone,
+      clientEmail: isNewLead ? formData.newClient?.email || '' : '',
+      clientNotes: isNewLead ? formData.newClient?.notes || '' : '',
       title: isExistingClient 
         ? `${bookingTypeTitle} - ${selectedClient.name}`
         : `${bookingTypeTitle} - ${formData.newClient?.name || 'New Lead'}`,
@@ -320,7 +331,7 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
       startTime: formData.isAllDay ? '06:00' : formData.startTime,
       endTime: formData.isAllDay ? '22:00' : formData.endTime,
       type: formData.bookingType,
-      address: isExistingClient ? selectedClient.address : formData.newClient?.address || '',
+      address: isExistingClient ? selectedClient.address : newLeadAddress,
       notes: sanitizeText(formData.notes || '', 2000),
       isAllDay: formData.isAllDay,
       isLead: isNewLead
@@ -599,24 +610,32 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
                   </div>
                 </div>
                 
+                {/* Full Name */}
                 <div>
-                  <Label className="trades-label text-ink mb-2 block">
-                    Name <span className="text-red-500">*</span>
+                  <Label htmlFor="newClientName" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Full Name *
                   </Label>
                   <Input
-                    placeholder="Client or company name"
+                    id="newClientName"
+                    placeholder="Enter full name…"
                     value={formData.newClient?.name || ''}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
                       newClient: { ...prev.newClient, name: e.target.value } as any
                     }))}
-                    className="h-12"
+                    className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                    style={{ 
+                      backgroundColor: formData.newClient?.name ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.name ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
                   />
                 </div>
                 
+                {/* Country Code */}
                 <div>
-                  <Label className="trades-label text-ink mb-2 block">
-                    Country <span className="text-red-500">*</span>
+                  <Label htmlFor="newClientCountry" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Country *
                   </Label>
                   <CountryCodeSelect
                     value={formData.newClient?.countryCode || '+44'}
@@ -624,15 +643,20 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
                       ...prev,
                       newClient: { ...prev.newClient, countryCode: value } as any
                     }))}
-                    className="h-12"
+                    className="h-11 rounded-lg border-2 transition-all focus:border-blue-500"
+                    style={{
+                      borderColor: '#E5E7EB'
+                    }}
                   />
                 </div>
                 
+                {/* Phone Number */}
                 <div>
-                  <Label className="trades-label text-ink mb-2 block">
-                    Phone <span className="text-red-500">*</span>
+                  <Label htmlFor="newClientPhone" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Phone Number *
                   </Label>
                   <Input
+                    id="newClientPhone"
                     placeholder={(formData.newClient?.countryCode || '+44') === '+44' ? "07123 456 789" : "Enter phone number"}
                     type="tel"
                     value={formData.newClient?.phone || ''}
@@ -640,26 +664,127 @@ export function AddBooking({ initialData, onNavigate, onBack, onBookingCreated }
                       ...prev,
                       newClient: { ...prev.newClient, phone: e.target.value } as any
                     }))}
-                    className="h-12"
+                    className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                    style={{ 
+                      backgroundColor: formData.newClient?.phone ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.phone ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
                   />
-                  <p className="trades-caption text-muted mt-2">
+                  <p className="trades-caption mt-2" style={{ color: '#6B7280' }}>
                     Mobile preferred; WhatsApp used for messages.
                   </p>
                 </div>
                 
+                {/* Address */}
                 <div>
-                  <Label className="trades-label text-ink mb-2 block">
-                    Address <span className="trades-caption text-muted">(Optional)</span>
+                  <Label htmlFor="newClientAddress" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Address *
                   </Label>
-                  <Textarea
-                    placeholder="Full address"
+                  <Input
+                    id="newClientAddress"
+                    placeholder="Street address…"
                     value={formData.newClient?.address || ''}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
                       newClient: { ...prev.newClient, address: e.target.value } as any
                     }))}
-                    rows={2}
-                    className="resize-none"
+                    className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                    style={{ 
+                      backgroundColor: formData.newClient?.address ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.address ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
+                  />
+                </div>
+
+                {/* City */}
+                <div>
+                  <Label htmlFor="newClientCity" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    City *
+                  </Label>
+                  <Input
+                    id="newClientCity"
+                    placeholder="Manchester…"
+                    value={formData.newClient?.city || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      newClient: { ...prev.newClient, city: e.target.value } as any
+                    }))}
+                    className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                    style={{ 
+                      backgroundColor: formData.newClient?.city ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.city ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
+                  />
+                </div>
+
+                {/* Postcode */}
+                <div>
+                  <Label htmlFor="newClientPostcode" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Postcode *
+                  </Label>
+                  <Input
+                    id="newClientPostcode"
+                    placeholder="M1…"
+                    value={formData.newClient?.postcode || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      newClient: { ...prev.newClient, postcode: e.target.value } as any
+                    }))}
+                    className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                    style={{ 
+                      backgroundColor: formData.newClient?.postcode ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.postcode ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <Label htmlFor="newClientEmail" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Email
+                  </Label>
+                  <Input
+                    id="newClientEmail"
+                    type="email"
+                    placeholder="client@example.com"
+                    value={formData.newClient?.email || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      newClient: { ...prev.newClient, email: e.target.value } as any
+                    }))}
+                    className="h-11 px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                    style={{ 
+                      backgroundColor: formData.newClient?.email ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.email ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
+                  />
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <Label htmlFor="newClientNotes" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                    Notes
+                  </Label>
+                  <Textarea
+                    id="newClientNotes"
+                    placeholder="Additional client information…"
+                    value={formData.newClient?.notes || ''}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      newClient: { ...prev.newClient, notes: e.target.value } as any
+                    }))}
+                    rows={3}
+                    className="px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0 resize-none min-h-[72px]"
+                    style={{ 
+                      backgroundColor: formData.newClient?.notes ? 'transparent' : '#F9FAFB',
+                      borderColor: formData.newClient?.notes ? '#E5E7EB' : '#D1D5DB',
+                      color: '#111827'
+                    }}
                   />
                 </div>
               </div>

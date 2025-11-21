@@ -11,28 +11,45 @@ const Toaster = ({ ...props }: ToasterProps) => {
       expand={false}
       richColors={false}
       visibleToasts={1}
-      duration={2000}
+      duration={3000}
       swipeable={true}
       dismissible={true}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-        } as React.CSSProperties
-      }
+      style={{
+        '--normal-bg': '#ffffff',
+        '--normal-text': '#111827',
+        '--normal-border': '#E5E7EB',
+        '--success-bg': '#16A34A',
+        '--success-text': '#ffffff',
+        '--error-bg': '#DC2626',
+        '--error-text': '#ffffff',
+        '--warning-bg': '#F59E0B',
+        '--warning-text': '#ffffff',
+        '--info-bg': '#0A84FF',
+        '--info-text': '#ffffff',
+        '--loading-bg': '#0A84FF',
+        '--loading-text': '#ffffff',
+      } as React.CSSProperties}
       toastOptions={{
+        unstyled: false,
         style: {
-          background: 'var(--popover)',
-          color: 'var(--popover-foreground)',
-          border: '1px solid var(--border)',
+          fontSize: '14px',
+          fontWeight: '500',
+          padding: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          border: 'none',
         },
         classNames: {
-          toast: 'group toast group-[.toaster]:bg-popover group-[.toaster]:text-popover-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-          description: 'group-[.toast]:text-muted-foreground',
-          actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-          cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
-          closeButton: 'group-[.toast]:bg-white group-[.toast]:text-gray-900 group-[.toast]:border-gray-200',
+          toast: 'group toast',
+          description: 'group-[.toast]:text-sm group-[.toast]:opacity-90',
+          actionButton: 'group-[.toast]:bg-white group-[.toast]:text-gray-900 group-[.toast]:font-medium',
+          cancelButton: 'group-[.toast]:bg-white/20 group-[.toast]:text-white',
+          closeButton: 'group-[.toast]:bg-white/20 group-[.toast]:text-white group-[.toast]:border-0 group-[.toast]:hover:bg-white/30',
+          success: 'group-[.toast]:!bg-green-600 group-[.toast]:!text-white',
+          error: 'group-[.toast]:!bg-red-600 group-[.toast]:!text-white',
+          warning: 'group-[.toast]:!bg-orange-500 group-[.toast]:!text-white',
+          info: 'group-[.toast]:!bg-blue-600 group-[.toast]:!text-white',
+          loading: 'group-[.toast]:!bg-blue-600 group-[.toast]:!text-white',
         },
         // Add aria attributes to handle accessibility warnings
         ariaProps: {

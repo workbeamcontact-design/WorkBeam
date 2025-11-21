@@ -418,6 +418,19 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
 
   const templateData = convertToTemplateFormat();
 
+  // Check if form is valid for submission
+  const isFormValid = () => {
+    // Must have a title
+    if (!quoteTitle.trim()) return false;
+    
+    // Must have at least one item with description and price
+    const hasValidItem = lineItems.some(item => 
+      item.description.trim() && Number(item.price) > 0
+    );
+    
+    return hasValidItem;
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col h-full" style={{ backgroundColor: '#F9FAFB' }}>
@@ -445,20 +458,28 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
           {/* Job info header */}
           <div className="bg-white rounded-xl p-3 border mb-4" style={{ borderColor: '#E5E7EB' }}>
             <div className="mb-3">
+              <Label htmlFor="quote-title" className="trades-label block mb-2" style={{ color: '#111827' }}>
+                Quote Title *
+              </Label>
               <Input
-                placeholder="New Quote"
+                id="quote-title"
+                placeholder="Enter quote title..."
                 value={quoteTitle}
                 onChange={(e) => setQuoteTitle(e.target.value)}
-                className="border-0 p-0 h-auto trades-h2 font-semibold text-left"
-                style={{ color: '#111827', backgroundColor: 'transparent' }}
+                className="h-auto trades-h2 font-semibold text-left px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                style={{ 
+                  color: '#111827', 
+                  backgroundColor: quoteTitle ? 'transparent' : '#F9FAFB',
+                  borderColor: quoteTitle ? '#E5E7EB' : '#D1D5DB'
+                }}
               />
             </div>
-            <p className="trades-caption" style={{ color: '#6B7280' }}>
-              {clientData?.name || "Loading client..."}
+            <p className="trades-body" style={{ color: '#6B7280' }}>
+              Client: {clientData?.name || "Loading client..."}
             </p>
-            {jobData?.address && (
+            {clientData?.address && (
               <p className="trades-caption mt-1" style={{ color: '#6B7280' }}>
-                {jobData.address}
+                Address: {clientData.address}
               </p>
             )}
           </div>
@@ -488,15 +509,18 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
                 <>
                   {lineItems.map((item, index) => (
                   <div key={item.id} className="bg-white rounded-xl border" style={{ borderColor: '#E5E7EB' }}>
-                    <div className="p-3">
-                      {/* Description (70%) */}
+                    <div className="p-3"> {/* Description (70%) */}
                       <div className="mb-2">
                         <Input
-                          placeholder="Item description"
+                          placeholder="Enter item description..."
                           value={item.description}
                           onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
-                          className="border-0 p-0 h-auto trades-body font-medium"
-                          style={{ color: '#111827' }}
+                          className="h-auto trades-body font-medium px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+                          style={{ 
+                            color: '#111827',
+                            backgroundColor: item.description ? 'transparent' : '#F9FAFB',
+                            borderColor: item.description ? '#E5E7EB' : '#D1D5DB'
+                          }}
                         />
                       </div>
                       
@@ -527,7 +551,8 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
                             }}
                             step="0.01"
                             min="0"
-                            className="h-11"
+                            className="h-8 text-center trades-caption"
+                            style={{ backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' }}
                           />
                         </div>
                         
@@ -671,8 +696,12 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="border-0 p-0 resize-none"
-              style={{ backgroundColor: 'transparent', color: '#111827' }}
+              className="resize-none px-3 py-2 rounded-lg border-2 transition-all focus:border-blue-500 focus:ring-0"
+              style={{ 
+                backgroundColor: notes ? 'transparent' : '#F9FAFB', 
+                color: '#111827',
+                borderColor: notes ? '#E5E7EB' : '#D1D5DB'
+              }}
             />
           </div>
         </div>
@@ -682,7 +711,7 @@ export function QuoteBuilder({ job, onNavigate, onBack }: QuoteBuilderProps) {
       <div className="absolute bottom-20 left-0 right-0 px-4">
         <button
           onClick={handleSendForApproval}
-          disabled={loading}
+          disabled={loading || !isFormValid()}
           className="w-full bg-blue-600 text-white py-4 rounded-xl trades-body font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading ? (

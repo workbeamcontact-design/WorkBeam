@@ -150,7 +150,7 @@ export function ProfessionalInvoiceTemplate({ data, className = "", bankDetails 
           <table className="w-full">
             <thead>
               <tr className="border-b-2 border-gray-800">
-                <th className="text-left py-3 font-semibold">DESCRIPTION</th>
+                <th className="text-left py-3 font-semibold">ITEM DESCRIPTION</th>
                 <th className="text-center py-3 font-semibold w-16">QTY</th>
                 <th className="text-right py-3 font-semibold w-24">UNIT PRICE</th>
                 <th className="text-right py-3 font-semibold w-24">AMOUNT</th>

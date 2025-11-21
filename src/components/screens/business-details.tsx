@@ -69,21 +69,21 @@ interface BusinessData {
 }
 
 const DEFAULT_BUSINESS: BusinessData = {
-  companyName: "ABC Windows Ltd",
+  companyName: "",
   companyNumber: "",
   vatNumber: "",
   
-  ownerName: "John Smith",
-  email: "info@abcwindows.co.uk",
+  ownerName: "",
+  email: "",
   phoneCountryCode: "+44",
-  phoneNumber: "161 555 0198",
-  website: "abcwindows.co.uk",
+  phoneNumber: "",
+  website: "",
   
   registeredAddress: {
-    line1: "12 High Street",
+    line1: "",
     line2: "",
-    city: "Manchester",
-    postcode: "M1 2AB",
+    city: "",
+    postcode: "",
     country: "United Kingdom"
   },
   tradingAddressDifferent: false,
