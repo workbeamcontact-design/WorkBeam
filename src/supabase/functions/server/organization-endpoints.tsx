@@ -557,7 +557,7 @@ app.post('/organization/invite', async (c) => {
     }
 
     // Send invitation email via Resend API
-    const appUrl = Deno.env.get('APP_URL') || 'https://workbeam.app';
+    const appUrl = Deno.env.get('APP_URL') || 'https://workbeam.co.uk';
     const invitation_url = `${appUrl}/invite/${token}`;
     console.log(`📧 Preparing to send invitation email to: ${email}`);
     console.log(`   Invitation URL: ${invitation_url}`);
@@ -1010,7 +1010,7 @@ app.post('/organization/invitation/:invitationId/resend', async (c) => {
     }
 
     // Resend invitation email via Resend API
-    const invitation_url = `${Deno.env.get('APP_URL') || 'https://workbeam.app'}/invite/${invitation.token}`;
+    const invitation_url = `${Deno.env.get('APP_URL') || 'https://workbeam.co.uk'}/invite/${invitation.token}`;
     
     try {
       const { sendEmail, createTeamInvitationEmail } = await import('./email-utils.tsx');

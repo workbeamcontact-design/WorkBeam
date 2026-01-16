@@ -493,7 +493,7 @@ export function getInvitationUrl(token: string): string {
   // Use current origin or default to production URL
   const baseUrl = typeof window !== 'undefined' 
     ? window.location.origin 
-    : 'https://workbeam.app';
+    : 'https://workbeam.co.uk';
   
   return `${baseUrl}/invite/${token}`;
 }
