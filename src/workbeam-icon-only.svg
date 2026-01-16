@@ -1,0 +1,17 @@
+<svg viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Logo icon only - Interwoven beams -->
+  <g transform="translate(2, 5)">
+    <!-- Blue beam -->
+    <path
+      d="M8 15 L22 15 L18 25 L32 25 L28 35 L14 35 L18 25 L4 25 Z"
+      fill="#0A84FF"
+      opacity="0.9"
+    />
+    <!-- Green beam overlay -->
+    <path
+      d="M14 12 L28 12 L24 22 L38 22 L34 32 L20 32 L24 22 L10 22 Z"
+      fill="#10B981"
+      opacity="0.7"
+    />
+  </g>
+</svg>
